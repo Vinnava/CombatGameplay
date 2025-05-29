@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GameplayGameMode.h"
-#include "../Player/GameplayCharacter.h"
+#include "../Character/CharacterBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 AGameplayGameMode::AGameplayGameMode()

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "GameplayCharacter.generated.h"
+#include "CharacterBase.generated.h"
 
 class UStateManagerComponent;
 class UStatsComponent;
@@ -18,7 +18,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AGameplayCharacter : public ACharacter
+class ACharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -46,7 +46,7 @@ class AGameplayCharacter : public ACharacter
 
 
 public:
-	AGameplayCharacter();
+	ACharacterBase();
 
 	virtual void PostInitializeComponents() override;
 

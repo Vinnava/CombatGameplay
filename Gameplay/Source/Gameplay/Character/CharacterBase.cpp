@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GameplayCharacter.h"
+#include "CharacterBase.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -16,7 +16,7 @@
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 
-AGameplayCharacter::AGameplayCharacter()
+ACharacterBase::ACharacterBase()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -56,23 +56,23 @@ AGameplayCharacter::AGameplayCharacter()
 }
 
 
-void AGameplayCharacter::PostInitializeComponents()
+void ACharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	
-	StatsComp->OnHealthChanged.AddDynamic(this,&AGameplayCharacter::OnHealthChanged);
-	StateManagerComp->OnCharacterStateBegin.AddDynamic(this,&AGameplayCharacter::OnCharacterStateBegin);
+	StatsComp->OnHealthChanged.AddDynamic(this,&ACharacterBase::OnHealthChanged);
+	StateManagerComp->OnCharacterStateBegin.AddDynamic(this,&ACharacterBase::OnCharacterStateBegin);
 }
 
 
-void AGameplayCharacter::BeginPlay()
+void ACharacterBase::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
 }
 
 
-void AGameplayCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -87,10 +87,10 @@ void AGameplayCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGameplayCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACharacterBase::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGameplayCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
 	}
 	else
 	{
@@ -99,7 +99,7 @@ void AGameplayCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 }
 
 
-void AGameplayCharacter::Move(const FInputActionValue& Value)
+void ACharacterBase::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	movementValue = Value.Get<FVector2D>();
@@ -123,7 +123,7 @@ void AGameplayCharacter::Move(const FInputActionValue& Value)
 }
 
 
-void AGameplayCharacter::Look(const FInputActionValue& Value)
+void ACharacterBase::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -137,7 +137,7 @@ void AGameplayCharacter::Look(const FInputActionValue& Value)
 }
 
 
-void AGameplayCharacter::OnHealthChanged_Implementation(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
+void ACharacterBase::OnHealthChanged_Implementation(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
 {
 	if (NewHealth <= 0.0f && Delta <= 0.0f)
 	{
@@ -146,7 +146,7 @@ void AGameplayCharacter::OnHealthChanged_Implementation(AActor* InstigatorActor,
 	}
 }
 
-void AGameplayCharacter::OnCharacterStateBegin_Implementation(FGameplayTag characterState)
+void ACharacterBase::OnCharacterStateBegin_Implementation(FGameplayTag characterState)
 {
 	
 }

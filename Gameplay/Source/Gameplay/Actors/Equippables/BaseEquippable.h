@@ -11,16 +11,18 @@ class GAMEPLAY_API ABaseEquippable : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
-	ABaseEquippable();
+private://variables
+	bool bIsEquipped{false};
 
-protected:
+protected://Functions
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+public://Variables
+
+	
+public:	//Functions
+	// Sets default values for this actor's properties
+	ABaseEquippable();
 
 };
