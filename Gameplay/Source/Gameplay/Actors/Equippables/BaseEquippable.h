@@ -3,26 +3,51 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
+#include "Gameplay/Interface/GameplayTagInterface.h"
 #include "BaseEquippable.generated.h"
 
+
+DECLARE_LOG_CATEGORY_EXTERN(LogBaseEquippable, Log, All);
+
 UCLASS()
-class GAMEPLAY_API ABaseEquippable : public AActor
+class GAMEPLAY_API ABaseEquippable : public AActor, public IGameplayTagInterface
 {
 	GENERATED_BODY()
 	
 private://variables
 	bool bIsEquipped{false};
 
-protected://Functions
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+	FName attachSocketName;
+
+protected://Variables
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
+	TObjectPtr<UPrimitiveComponent> itemMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = GameplayTag)
+	FGameplayTag ownedGameplayTags;
 
 public://Variables
 
 	
+private://Functions
+	bool AttachActorToSocket(FName socketName);
+
 public:	//Functions
 	// Sets default values for this actor's properties
 	ABaseEquippable();
 
+	UPrimitiveComponent* GetItemMesh() const { return itemMesh; }
+
+	void OnEquipped();
+
+	void OnUnequipped();
+
+	bool IsEquipped() const { return bIsEquipped; }
+
+	FGameplayTag GetOwnedGameplayTag_Implementation();
+
+	bool HasMatchingGameplayTag_Implementation(FGameplayTagContainer tagsToCheck);
 };

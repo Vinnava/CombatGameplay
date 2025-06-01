@@ -6,12 +6,15 @@
 #include "Components/ActorComponent.h"
 #include "EquipmentComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogEquipementComponent, Log, All);
+
 class ABaseEquippable;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAMEPLAY_API UEquipmentComponent : public UActorComponent
 {
 	GENERATED_BODY()
+	
 private://Variables
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<ABaseEquippable>> currentEquipments;
@@ -21,5 +24,5 @@ private://Variables
 public://Functions
 	void InitializeEquipment();
 
-	TArray<TObjectPtr<ABaseEquippable>> GetCurrentEquipments() const;
+	TArray<TObjectPtr<ABaseEquippable>> GetCurrentEquipments() const { return currentEquipments; }
 };

@@ -2,17 +2,64 @@
 
 #include "BaseEquippable.h"
 
+#include "GameFramework/Character.h"
+
+DEFINE_LOG_CATEGORY(LogBaseEquippable);
 
 // Sets default values
 ABaseEquippable::ABaseEquippable()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	itemMesh = CreateDefaultSubobject<UStaticMeshComponent>("ItemMesh");
+	itemMesh->SetupAttachment(RootComponent);
+	itemMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	itemMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	itemMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	itemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	itemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+	itemMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
-// Called when the game starts or when spawned
-void ABaseEquippable::BeginPlay()
+bool ABaseEquippable::AttachActorToSocket(FName socketName)
 {
-	Super::BeginPlay();
+	TObjectPtr<ACharacter> attachActor = Cast<ACharacter>(GetOwner());
+	if (attachActor)
+	{
+		TObjectPtr<USkeletalMeshComponent> characterMesh = attachActor->GetMesh();
+		if (characterMesh)
+		{
+			bool bIsAttached = itemMesh->AttachToComponent(characterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, socketName);
+			return bIsAttached;
+		}
+	}
+	return false;
 }
 
+void ABaseEquippable::OnEquipped()
+{
+	bIsEquipped = AttachActorToSocket(attachSocketName);
+	
+	UE_LOG(LogBaseEquippable, Log, TEXT("%s Equipped State: %s"), *itemMesh->GetName(), bIsEquipped ? TEXT("True") : TEXT("False"));
+}
+
+void ABaseEquippable::OnUnequipped()
+{
+	if (bIsEquipped)
+	{
+		bIsEquipped = false;
+	}
+}
+
+#pragma region GameplayTagInterface
+FGameplayTag ABaseEquippable::GetOwnedGameplayTag_Implementation()
+{
+	return ownedGameplayTags;
+}
+
+bool ABaseEquippable::HasMatchingGameplayTag_Implementation(FGameplayTagContainer tagsToCheck)
+{
+	return tagsToCheck.HasTag(ownedGameplayTags);
+}
+#pragma endregion GameplayTagInterface

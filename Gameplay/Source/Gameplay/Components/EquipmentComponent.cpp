@@ -5,35 +5,55 @@
 #include "Gameplay/Actors/Equippables/BaseEquippable.h"
 #include "Gameplay/Character/CharacterBase.h"
 
+DEFINE_LOG_CATEGORY(LogEquipementComponent)
 
  void UEquipmentComponent::InitializeEquipment()
- {
-	 for (TSubclassOf<ABaseEquippable> startingEquipemet : startingEquipments)
-	 {
-	 	if (!startingEquipemet) return;
-	 	
-	 	TObjectPtr<ACharacterBase> character = Cast<ACharacterBase>(GetOwner());
-	 	if (!character) return;
+{
+	TObjectPtr<ACharacterBase> character = Cast<ACharacterBase>(GetOwner());
+	if (!character)
+	{
+		UE_LOG(LogEquipementComponent, Warning, TEXT("Failed to cast owner to ACharacterBase"));
+		return;
+	}
 
-	 	// Spawn Parameters
-	 	FTransform spawnTransform = character->GetActorTransform();
-	 	FActorSpawnParameters SpawnParams;
-	 	SpawnParams.Owner = GetOwner();
-	 	SpawnParams.Instigator = Cast<APawn>(GetOwner());
-	 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
-	 	
-	 	// Spawn the actor
-	 	ABaseEquippable* spawnedActor = GetWorld()->SpawnActor<ABaseEquippable>(startingEquipemet, spawnTransform, SpawnParams);
+	if (startingEquipments.IsEmpty())
+	{
+		UE_LOG(LogEquipementComponent, Log, TEXT("No starting equipment to spawn"));
+		return;
+	}
 
-	 	//spawnedActor->OnEquiped();
-	 	
-	 	currentEquipments.AddUnique(spawnedActor);
+	// Set up spawn parameters 
+	const FTransform spawnTransform = character->GetActorTransform();
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.Instigator = Cast<APawn>(GetOwner());
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+	for (const TSubclassOf<ABaseEquippable>& startingEquipment : startingEquipments)
+	{
+		if (!startingEquipment)
+		{
+			UE_LOG(LogEquipementComponent, Warning, TEXT("Null equipment class found in startingEquipments, skipping"));
+			continue;
+		}
+		
+		// Spawn the equipment
+		ABaseEquippable* spawnedActor = GetWorld()->SpawnActor<ABaseEquippable>(startingEquipment, spawnTransform, SpawnParams);
 
-	 	//spawnedActor->ToggleCombat();
-	 }
- }
+		// Validate spawn was successful
+		if (!spawnedActor)
+		{
+			UE_LOG(LogEquipementComponent, Error, TEXT("Failed to spawn equipment: %s"), *startingEquipment->GetName());
+			continue;
+		}
 
- TArray<TObjectPtr<ABaseEquippable>> UEquipmentComponent::GetCurrentEquipments() const
- {
- 	return currentEquipments;
- }
+		// Add to equipment list
+		currentEquipments.AddUnique(spawnedActor);
+		
+		// spawnedActor->OnEquipped();
+		// spawnedActor->ToggleCombat();
+    
+		UE_LOG(LogEquipementComponent, Log, TEXT("Successfully spawned equipment: %s"), *spawnedActor->GetName());
+	}
+}
+
