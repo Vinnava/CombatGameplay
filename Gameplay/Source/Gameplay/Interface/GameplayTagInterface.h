@@ -20,7 +20,7 @@ class GAMEPLAY_API IGameplayTagInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	FGameplayTag GetOwnedGameplayTag();
+	const FGameplayTag& GetOwnedGameplayTag() const;
 
 	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
 };

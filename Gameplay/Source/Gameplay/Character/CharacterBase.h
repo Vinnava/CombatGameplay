@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gameplay/Interface/GameplayTagInterface.h"
 #include "Logging/LogMacros.h"
 #include "CharacterBase.generated.h"
 
@@ -18,7 +19,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class ACharacterBase : public ACharacter
+class ACharacterBase : public ACharacter, public IGameplayTagInterface
 {
 	GENERATED_BODY()
 
@@ -73,6 +74,11 @@ public:
 	/** Returns FollowCamera subobject *#1#
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	*/
+
+	FGameplayTag some;
+	const FGameplayTag& GetOwnedGameplayTag() const ;
+
+	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
 
 	
 protected:

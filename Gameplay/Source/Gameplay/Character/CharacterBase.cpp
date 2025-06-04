@@ -71,6 +71,18 @@ void ACharacterBase::BeginPlay()
 	Super::BeginPlay();
 }
 
+////////////
+const FGameplayTag& ACharacterBase::GetOwnedGameplayTag() const
+{
+	return some;
+}
+
+////////////
+bool ACharacterBase::HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck)
+{
+	return false;
+}
+
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

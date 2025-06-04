@@ -2,12 +2,13 @@
 
 
 #include "EquipmentComponent.h"
-#include "Gameplay/Actors/Equippables/BaseEquippable.h"
+
+#include "Gameplay/Actors/Equippables/Base/BaseEquippable.h"
 #include "Gameplay/Character/CharacterBase.h"
 
 DEFINE_LOG_CATEGORY(LogEquipementComponent)
 
- void UEquipmentComponent::InitializeEquipment()
+void UEquipmentComponent::InitializeEquipment()
 {
 	TObjectPtr<ACharacterBase> character = Cast<ACharacterBase>(GetOwner());
 	if (!character)
