@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "Engine/HitResult.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "CollisionComponent.generated.h"
 
@@ -25,7 +26,7 @@ public:
 private://Variables
 	TObjectPtr<UPrimitiveComponent> collisionMeshComp;
 	bool bIsCollisionEnabled{false};
-	FHitResult LastHitResult;
+	FHitResult lastHitResult;
 	TObjectPtr<AActor> lastHitActor;
 	TArray<TObjectPtr<AActor>> alreadyHitActors;
 	

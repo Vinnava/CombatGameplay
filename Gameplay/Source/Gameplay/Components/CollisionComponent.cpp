@@ -3,6 +3,9 @@
 
 #include "CollisionComponent.h"
 
+#include "CollisionShape.h"
+#include "Components/PrimitiveComponent.h"
+#include "Engine/World.h"
 #include "Gameplay/Character/CharacterBase.h"
 
 
@@ -23,6 +26,7 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
+//Initialize
 void UCollisionComponent::Initialize(const FName& inStartSocketName,
 									 const FName& inEndSocketName,
 									 float inTraceRadius,
@@ -105,16 +109,20 @@ void UCollisionComponent::CollisionTrace()
 	{
 		for (const FHitResult& hitResult : hitResults)
 		{
-			ACharacterBase* hitActor = Cast<ACharacterBase>(hitResult.GetActor());
+			AActor* hitActor = hitResult.GetActor();
+			//ACharacterBase* hitActor = Cast<ACharacterBase>(hitResult.GetActor());
 			if (hitActor)
 			{
-				const FGameplayTag& hitActorTag = hitActor->GetOwnedGameplayTag();
-				if (!ignoreGameplayTags.HasTag(hitActorTag) && !alreadyHitActors.Contains(hitActor))
+				if (IGameplayTagInterface* hitActorTagInterface = Cast<IGameplayTagInterface>(hitActor))
 				{
-					LastHitResult = hitResult;
-					lastHitActor = hitActor;
-					alreadyHitActors.Add(hitActor);
-					onHitCollision.Broadcast(LastHitResult);
+					const FGameplayTag& hitActorTag = hitActorTagInterface->GetOwnedGameplayTag();
+					if (!ignoreGameplayTags.HasTag(hitActorTag) && !alreadyHitActors.Contains(hitActor))
+					{
+						lastHitResult = hitResult;
+						lastHitActor = hitActor;
+						alreadyHitActors.Add(hitActor);
+						onHitCollision.Broadcast(lastHitResult);
+					}
 				}
 			}
 		}

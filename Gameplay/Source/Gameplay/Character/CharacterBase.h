@@ -76,7 +76,7 @@ public:
 	*/
 
 	FGameplayTag some;
-	const FGameplayTag& GetOwnedGameplayTag() const ;
+	const FGameplayTag& GetOwnedGameplayTag() const override;
 
 	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
 

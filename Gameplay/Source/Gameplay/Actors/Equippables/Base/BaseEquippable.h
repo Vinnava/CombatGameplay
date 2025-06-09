@@ -47,7 +47,7 @@ public:	//Functions
 
 	bool IsEquipped() const { return bIsEquipped; }
 
-	FGameplayTag GetOwnedGameplayTag_Implementation();
+	const FGameplayTag& GetOwnedGameplayTag() const override;
 
-	bool HasMatchingGameplayTag_Implementation(FGameplayTagContainer tagsToCheck);
+	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
 };

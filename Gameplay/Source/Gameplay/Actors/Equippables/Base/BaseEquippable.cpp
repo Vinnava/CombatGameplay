@@ -2,6 +2,8 @@
 
 #include "BaseEquippable.h"
 
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/Character.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEquippable);
@@ -53,12 +55,12 @@ void ABaseEquippable::OnUnequipped()
 }
 
 #pragma region GameplayTagInterface
-FGameplayTag ABaseEquippable::GetOwnedGameplayTag_Implementation()
+const FGameplayTag& ABaseEquippable::GetOwnedGameplayTag() const
 {
 	return ownedGameplayTags;
 }
 
-bool ABaseEquippable::HasMatchingGameplayTag_Implementation(FGameplayTagContainer tagsToCheck)
+bool ABaseEquippable::HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck)
 {
 	return tagsToCheck.HasTag(ownedGameplayTags);
 }
