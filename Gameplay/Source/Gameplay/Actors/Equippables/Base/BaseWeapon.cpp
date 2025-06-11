@@ -3,3 +3,11 @@
 
 #include "BaseWeapon.h"
 
+#include "Gameplay/Components/CollisionComponent.h"
+
+ABaseWeapon::ABaseWeapon()
+{
+	PrimaryActorTick.bCanEverTick = false;
+
+	collisionComp = CreateDefaultSubobject<UCollisionComponent>("CollisionComp");
+}

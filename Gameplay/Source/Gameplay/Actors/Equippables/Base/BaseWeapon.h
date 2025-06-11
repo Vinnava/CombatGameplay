@@ -13,5 +13,23 @@ UCLASS()
 class GAMEPLAY_API ABaseWeapon : public ABaseEquippable
 {
 	GENERATED_BODY()
+
+private://Variables
+
 	
+protected://Variables
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
+	TObjectPtr<class UCollisionComponent> collisionComp;
+
+public://Variables
+	ABaseWeapon();
+
+private://Functions
+
+
+protected://Functions
+
+	
+public://Functions
+
 };

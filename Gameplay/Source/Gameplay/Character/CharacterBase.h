@@ -22,17 +22,6 @@ UCLASS(config=Game)
 class ACharacterBase : public ACharacter, public IGameplayTagInterface
 {
 	GENERATED_BODY()
-
-	/*
-	/** Camera boom positioning the camera behind the character #1#
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
-
-	/** Follow camera #1#
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
-	*/
-	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -66,37 +55,38 @@ protected:
 	// To add mapping context
 	virtual void BeginPlay();
 
-public:
+private://Variables
+
+protected://Variables
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	FVector2D movementValue;
 	
-	/*
-	/** Returns CameraBoom subobject *#1#
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject *#1#
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	*/
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
+	TObjectPtr<UStatsComponent> statsComp;
 
-	FGameplayTag some;
-	const FGameplayTag& GetOwnedGameplayTag() const override;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
+	TObjectPtr<UStateManagerComponent> stateManagerComp ;
 
-	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Initialize)
+	FGameplayTag ownedGameplayTag;
 	
-protected:
-//Functions	
+public://Variables
+
+private://Functions
+
+protected://Functions
 	UFUNCTION(BlueprintNativeEvent, Category = Stats)
 	void OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta);
 
 	UFUNCTION(BlueprintNativeEvent, Category = StateManager)
 	void OnCharacterStateBegin(FGameplayTag characterState);
-
-//Variables
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
-	FVector2D movementValue;
 	
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
-	TObjectPtr<UStatsComponent> StatsComp;
+	
+public://Functions
+#pragma region IGameplayTagInterface
+	const FGameplayTag& GetOwnedGameplayTag() const override;
+	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck) override;
+#pragma endregion IGameplayTagInterface
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
-	TObjectPtr<UStateManagerComponent> StateManagerComp ;
 };
 

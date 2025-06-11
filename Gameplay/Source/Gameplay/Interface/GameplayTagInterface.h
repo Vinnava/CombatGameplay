@@ -18,9 +18,8 @@ class GAMEPLAY_API IGameplayTagInterface
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
-public:
+public://Functions
 	virtual const FGameplayTag& GetOwnedGameplayTag() const = 0;
 
-	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
+	virtual bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck) = 0;
 };

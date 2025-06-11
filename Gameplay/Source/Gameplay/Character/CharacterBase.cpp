@@ -50,9 +50,9 @@ ACharacterBase::ACharacterBase()
 	*/
 
 	//Create a StatsComponent
-	StatsComp = CreateDefaultSubobject<UStatsComponent>("StatsComponent");
+	statsComp = CreateDefaultSubobject<UStatsComponent>("StatsComponent");
 
-	StateManagerComp = CreateDefaultSubobject<UStateManagerComponent>("StateManagerComponent");
+	stateManagerComp = CreateDefaultSubobject<UStateManagerComponent>("StateManagerComponent");
 }
 
 
@@ -60,8 +60,8 @@ void ACharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	
-	StatsComp->OnHealthChanged.AddDynamic(this,&ACharacterBase::OnHealthChanged);
-	StateManagerComp->OnCharacterStateBegin.AddDynamic(this,&ACharacterBase::OnCharacterStateBegin);
+	statsComp->OnHealthChanged.AddDynamic(this,&ACharacterBase::OnHealthChanged);
+	stateManagerComp->OnCharacterStateBegin.AddDynamic(this,&ACharacterBase::OnCharacterStateBegin);
 }
 
 
@@ -74,13 +74,13 @@ void ACharacterBase::BeginPlay()
 ////////////
 const FGameplayTag& ACharacterBase::GetOwnedGameplayTag() const
 {
-	return some;
+	return ownedGameplayTag;
 }
 
 ////////////
 bool ACharacterBase::HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck)
 {
-	return false;
+	return tagsToCheck.HasTag(ownedGameplayTag);
 }
 
 

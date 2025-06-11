@@ -4,6 +4,7 @@
 #include "CollisionComponent.h"
 
 #include "CollisionShape.h"
+#include "KismetTraceUtils.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 #include "Gameplay/Character/CharacterBase.h"
@@ -15,7 +16,6 @@ UCollisionComponent::UCollisionComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	
 }
 
 // Called every frame
@@ -23,26 +23,10 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
-}
-
-//Initialize
-void UCollisionComponent::Initialize(const FName& inStartSocketName,
-									 const FName& inEndSocketName,
-									 float inTraceRadius,
-									 EObjectTypeQuery inTraceObjectType,
-									 const TArray<TObjectPtr<AActor>>& inActorsToIgnore,
-									 EDrawDebugTrace::Type inDrawDebugType,
-									 const FGameplayTagContainer& inIgnoreGameplayTags)
-						
-{
-	startSocketName = inStartSocketName;
-	endSocketName = inEndSocketName;
-	traceRadius = inTraceRadius;
-	traceObjectType = inTraceObjectType;
-	actorsToIgnore = inActorsToIgnore;
-	drawDebugType = inDrawDebugType;
-	ignoreGameplayTags = inIgnoreGameplayTags;
+	if (bIsCollisionEnabled)
+	{
+		CollisionTrace();
+	}
 }
 
 //Activates the collision functionality for the UCollisionComponent.
@@ -93,13 +77,20 @@ void UCollisionComponent::CollisionTrace()
 	queryParams.AddIgnoredActor(GetOwner());
 	queryParams.AddIgnoredActors(actorsToIgnore);
 
+	// Object types to trace
+	FCollisionObjectQueryParams objectParams;
+	for (ECollisionChannel Channel : traceObjectType)
+	{
+		objectParams.AddObjectTypesToQuery(Channel);
+	}
+
 	// Perform the multi-sphere trace
 	bool bHit = GetWorld()->SweepMultiByObjectType(
 		hitResults,
 		startLoc,
 		endLoc,
 		FQuat::Identity,
-		traceObjectType,
+		objectParams,
 		sphereShape,
 		queryParams
 	);
@@ -113,7 +104,7 @@ void UCollisionComponent::CollisionTrace()
 			//ACharacterBase* hitActor = Cast<ACharacterBase>(hitResult.GetActor());
 			if (hitActor)
 			{
-				if (IGameplayTagInterface* hitActorTagInterface = Cast<IGameplayTagInterface>(hitActor))
+				if (const IGameplayTagInterface* hitActorTagInterface = Cast<IGameplayTagInterface>(hitActor))
 				{
 					const FGameplayTag& hitActorTag = hitActorTagInterface->GetOwnedGameplayTag();
 					if (!ignoreGameplayTags.HasTag(hitActorTag) && !alreadyHitActors.Contains(hitActor))

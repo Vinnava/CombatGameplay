@@ -32,13 +32,19 @@ private://Variables
 	
 protected://Variables
 #pragma region 	Initialization Variables
-	//Initialization
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FName startSocketName;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FName endSocketName;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	float traceRadius;
-	EObjectTypeQuery traceObjectType;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+	TArray<TEnumAsByte<ECollisionChannel>> traceObjectType;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	TArray<TObjectPtr<AActor>> actorsToIgnore;
-	EDrawDebugTrace::Type drawDebugType;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+	TEnumAsByte<EDrawDebugTrace::Type> drawDebugType;
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FGameplayTagContainer ignoreGameplayTags;
 #pragma endregion 
 	
@@ -52,25 +58,22 @@ protected://Functions
 
 	
 public://Functions
-	void Initialize(const FName& inStartSocketName,
-					const FName& inEndSocketName,
-					float inTraceRadius,
-					EObjectTypeQuery inTraceObjectType,
-					const TArray<TObjectPtr<AActor>>& inActorsToIgnore,
-					EDrawDebugTrace::Type inDrawDebugType,
-					const FGameplayTagContainer& inIgnoreGameplayTags);
 	void ActivateCollision();
 	void DeactivateCollision();
 	void ClearHitActors();
 	void SetCollisionMeshComponent(TObjectPtr<UPrimitiveComponent> collisionMesh);
 	void CollisionTrace();
-//Getters
+	
+#pragma region Getters
 	bool IsCollisionEnabled() const {return bIsCollisionEnabled;}
 	TArray<TObjectPtr<AActor>> GetAlreadyHitActors() const {return alreadyHitActors;}
 	TObjectPtr<AActor>GetLastHitActor() const {return lastHitActor;}
 	TObjectPtr<UPrimitiveComponent> GetCollisionMeshComp() const {return collisionMeshComp;}
 	TArray<TObjectPtr<AActor>> GetActorsToIgnore() const {return actorsToIgnore;}
-//Helpers
+#pragma endregion Getters
+	
+#pragma region Helper Functions
 	void AddIgnoreActor(AActor* actorToIgnore) { actorsToIgnore.AddUnique(actorToIgnore); }
 	void RemoveIgnoreActor(AActor* actorToIgnore) { actorsToIgnore.Remove(actorToIgnore); }
+#pragma endregion Helper Functions	
 };

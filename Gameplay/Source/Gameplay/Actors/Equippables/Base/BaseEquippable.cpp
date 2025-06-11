@@ -57,11 +57,11 @@ void ABaseEquippable::OnUnequipped()
 #pragma region GameplayTagInterface
 const FGameplayTag& ABaseEquippable::GetOwnedGameplayTag() const
 {
-	return ownedGameplayTags;
+	return ownedGameplayTag;
 }
 
 bool ABaseEquippable::HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck)
 {
-	return tagsToCheck.HasTag(ownedGameplayTags);
+	return tagsToCheck.HasTag(ownedGameplayTag);
 }
 #pragma endregion GameplayTagInterface

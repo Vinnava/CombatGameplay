@@ -27,7 +27,7 @@ protected://Variables
 	TObjectPtr<UPrimitiveComponent> itemMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = GameplayTag)
-	FGameplayTag ownedGameplayTags;
+	FGameplayTag ownedGameplayTag;
 
 public://Variables
 
@@ -49,5 +49,5 @@ public:	//Functions
 
 	const FGameplayTag& GetOwnedGameplayTag() const override;
 
-	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck);
+	bool HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck) override;
 };
