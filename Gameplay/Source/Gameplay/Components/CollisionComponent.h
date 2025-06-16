@@ -16,21 +16,7 @@ class GAMEPLAY_API UCollisionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	UCollisionComponent();
-	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 private://Variables
-	TObjectPtr<UPrimitiveComponent> collisionMeshComp;
-	bool bIsCollisionEnabled{false};
-	FHitResult lastHitResult;
-	TObjectPtr<AActor> lastHitActor;
-	TArray<TObjectPtr<AActor>> alreadyHitActors;
-	
-protected://Variables
 #pragma region 	Initialization Variables
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FName startSocketName;
@@ -46,18 +32,27 @@ protected://Variables
 	TEnumAsByte<EDrawDebugTrace::Type> drawDebugType;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FGameplayTagContainer ignoreGameplayTags;
-#pragma endregion 
+#pragma endregion
 	
+	TObjectPtr<UPrimitiveComponent> collisionMeshComp;
+	bool bIsCollisionEnabled{false};
+	FHitResult lastHitResult;
+	TObjectPtr<AActor> lastHitActor;
+	TArray<TObjectPtr<AActor>> alreadyHitActors;
+
 public://Variables
 	FOnHit onHitCollision;
 	
 private://Functions
 
 	
-protected://Functions
-
-	
 public://Functions
+	// Sets default values for this component's properties
+	UCollisionComponent();
+	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 	void ActivateCollision();
 	void DeactivateCollision();
 	void ClearHitActors();
