@@ -41,9 +41,9 @@ public:	//Functions
 
 	UPrimitiveComponent* GetItemMesh() const { return itemMesh; }
 
-	void OnEquipped();
+	virtual void OnEquipped();
 
-	void OnUnequipped();
+	virtual void OnUnequipped();
 
 	bool IsEquipped() const { return bIsEquipped; }
 
