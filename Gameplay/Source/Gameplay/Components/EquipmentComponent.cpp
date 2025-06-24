@@ -4,7 +4,7 @@
 #include "EquipmentComponent.h"
 
 #include "Gameplay/Actors/Equippables/Base/BaseEquippable.h"
-#include "Gameplay/Character/CharacterBase.h"
+#include "Gameplay/Character/Base//CharacterBase.h"
 
 DEFINE_LOG_CATEGORY(LogEquipementComponent)
 

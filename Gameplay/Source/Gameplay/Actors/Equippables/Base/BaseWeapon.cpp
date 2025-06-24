@@ -5,7 +5,9 @@
 
 #include "Gameplay/Components/CollisionComponent.h"
 #include "Gameplay/Components/CombatComponent.h"
+#include "Gameplay/Data/GameplayTagData.h"
 #include "Kismet/GameplayStatics.h"
+
 
 ABaseWeapon::ABaseWeapon()
 {
@@ -64,19 +66,24 @@ void ABaseWeapon::ToggleCombat()
 	combatComp->SetCombatEnabled(true);
 }
 
-TArray<TObjectPtr<UAnimMontage>> ABaseWeapon::GetActioMontages(FGameplayTag characterAction) const
+const TArray<TObjectPtr<UAnimMontage>>& ABaseWeapon::GetActioMontages(FGameplayTag characterAction) const
 {
-	switch (characterAction)
+	if (characterAction.MatchesTagExact(lightAttackActionTag))
 	{
-		case characterAction.MatchesTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Action.Attack.LightAttack"))):
-			return lightAttackMontages;
-		case characterAction.MatchesTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Action.Dodge"))):
-			return dodgeMontages;
-		case characterAction.MatchesTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Action.Die"))):
-			return dieMontages;
-		default:
-			TArray<TObjectPtr<UAnimMontage>> null;
-			return null;
+		return lightAttackMontages;
+	}
+	else if (characterAction.MatchesTagExact(dodgeActionTag))
+	{
+		return dodgeMontages;
+	}
+	else if (characterAction.MatchesTagExact(dieActionTag))
+	{
+		return dieMontages;
+	}
+	else
+	{
+		static const TArray<TObjectPtr<UAnimMontage>> EmptyMontages;
+		return EmptyMontages;
 	}
 }
 

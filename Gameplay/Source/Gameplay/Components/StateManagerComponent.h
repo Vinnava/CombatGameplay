@@ -7,10 +7,10 @@
 #include "Components/ActorComponent.h"
 #include "StateManagerComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterStateBegin, FGameplayTag, characterState);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterStateEnd, FGameplayTag, characterState);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterActionBegin, FGameplayTag, characterAction);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterActionEnd, FGameplayTag, characterAction);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterStateBegin, FGameplayTag);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterStateEnd, FGameplayTag);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterActionBegin, FGameplayTag);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterActionEnd, FGameplayTag);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -22,16 +22,12 @@ private://Variables
 	FGameplayTag currentAction;
 	
 public://Variables
-	UPROPERTY(BlueprintAssignable)
 	FOnCharacterStateBegin OnCharacterStateBegin;
-
-	UPROPERTY(BlueprintAssignable)
+	
 	FOnCharacterStateEnd OnCharacterStateEnd;
-
-	UPROPERTY(BlueprintAssignable)
+	
 	FOnCharacterActionBegin OnCharacterActionBegin;
-
-	UPROPERTY(BlueprintAssignable)
+	
 	FOnCharacterActionEnd OnCharacterActionEnd;
 
 public://Functions

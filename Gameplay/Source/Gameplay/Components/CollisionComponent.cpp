@@ -4,10 +4,9 @@
 #include "CollisionComponent.h"
 
 #include "CollisionShape.h"
-#include "KismetTraceUtils.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
-#include "Gameplay/Character/CharacterBase.h"
+#include "Gameplay/Character/Base/CharacterBase.h"
 
 
 // Sets default values for this component's properties

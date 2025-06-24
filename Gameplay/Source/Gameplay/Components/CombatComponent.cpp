@@ -19,7 +19,7 @@ void UCombatComponent::SetMainWeapon(ABaseWeapon* inMainWeapon)
 	}
 }
 
-TObjectPtr<ABaseWeapon> UCombatComponent::GetMainWeapon() const
+ABaseWeapon* UCombatComponent::GetMainWeapon() const
 {
 	return mainWeapon;
 }

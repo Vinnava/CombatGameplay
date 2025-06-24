@@ -14,18 +14,18 @@ class GAMEPLAY_API UCombatComponent : public UActorComponent
 	GENERATED_BODY()
 	
 private://Variables
-	bool bIsCombatEnabled;
-	bool bIsAttackSaved;
-	bool bCanContinueAttack;
 	TObjectPtr<class ABaseWeapon> mainWeapon;
 
 public://Variables
 	int32 attackCount;
 	FOnToggleCombat onToggleCombat;
+	bool bIsAttackSaved;
+	bool bIsCombatEnabled;
+	bool bCanContinueAttack;
 
 public://Functions
 	void SetMainWeapon(ABaseWeapon* inMainWeapon);
-	TObjectPtr<ABaseWeapon> GetMainWeapon() const;
+	ABaseWeapon* GetMainWeapon() const;
 	void SetCombatEnabled(bool bIsEnabled);
 	bool IsCombatEnabled() const { return bIsCombatEnabled; }
 	void ResetCombat();

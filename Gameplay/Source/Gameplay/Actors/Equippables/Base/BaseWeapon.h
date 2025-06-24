@@ -21,9 +21,13 @@ protected://Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	TObjectPtr<class UCollisionComponent> collisionComp;
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Initialization)
-	//FName attachSocketName;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stats)
+	float damage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stats)
+	TObjectPtr<class UCombatComponent> combatComp;
+
+public://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
 	TArray<TObjectPtr<UAnimMontage>> lightAttackMontages;
 
@@ -45,16 +49,15 @@ protected://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
 	TObjectPtr<UAnimMontage> hitMontage_L;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stats)
-	float damage;
+private://Functions
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stats)
-	TObjectPtr<class UCombatComponent> combatComp;
 
-public://Variables
-	ABaseWeapon();
+protected://Functions
 	void BeginPlay() override;
-
+	
+public://Functions
+	ABaseWeapon();
+	
 	void OnEquipped() override;
 	void OnHit(FHitResult hitResult);
 	void SimulateWeaponPhysics();
@@ -65,7 +68,7 @@ public://Variables
 	void ToggleCombat();
 	
 	float GetDamage() const { return damage; }
-	TArray<TObjectPtr<UAnimMontage>> GetActioMontages(FGameplayTag characterAction) const;
+	const TArray<TObjectPtr<UAnimMontage>>& GetActioMontages(FGameplayTag characterAction) const;
 
 private://Functions
 

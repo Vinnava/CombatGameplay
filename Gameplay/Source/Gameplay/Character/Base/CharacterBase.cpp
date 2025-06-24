@@ -1,0 +1,299 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#include "CharacterBase.h"
+
+#include "AIController.h"
+#include "BrainComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Controller.h"
+#include "MotionWarpingComponent.h"
+#include "Gameplay/Actors/Equippables/Base/BaseWeapon.h"
+#include "Gameplay/Components/CombatComponent.h"
+#include "Gameplay/Components/EquipmentComponent.h"
+#include "Gameplay/Components/StateManagerComponent.h"
+#include "Gameplay/Components/StatsComponent.h"
+#include "Gameplay/Data/GameplayData.h"
+#include "Gameplay/Data/GameplayTagData.h"
+
+DEFINE_LOG_CATEGORY(LogBaseCharacter);
+
+
+ACharacterBase::ACharacterBase()
+{
+	// Set size for collision capsule
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+		
+	// Don't rotate when the controller rotates. Let that just affect the camera.
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = false; 
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); 
+	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+
+	//Creating Components
+	statsComp = CreateDefaultSubobject<UStatsComponent>("StatsComponent");
+	stateManagerComp = CreateDefaultSubobject<UStateManagerComponent>("StateManagerComponent");
+	combatComp = CreateDefaultSubobject<UCombatComponent>("NCombatComponent");
+	equipComp = CreateDefaultSubobject<UEquipmentComponent>("NEquipmentComponent");
+	motionWarpingComp = CreateDefaultSubobject<UMotionWarpingComponent>("NMotionWarpingComponent");
+}
+
+
+void ACharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	
+	statsComp->OnHealthChanged.AddDynamic(this,&ACharacterBase::OnHealthChanged);
+	stateManagerComp->OnCharacterStateBegin.AddUObject(this,&ACharacterBase::OnCharacterStateBegin);
+}
+
+void ACharacterBase::BeginPlay()
+{
+	// Call the base class  
+	Super::BeginPlay();
+}
+
+bool ACharacterBase::CanPerformAttack() const
+{
+	FGameplayTagContainer statesToCheck;
+	statesToCheck.AddTag(deadStateTag);
+	statesToCheck.AddTag(dodgingStateTag);
+	statesToCheck.AddTag(disabledStateTag);
+	statesToCheck.AddTag(generalActionStateTag);
+	statesToCheck.AddTag(attackingStateTag);
+	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && combatComp->bIsCombatEnabled;
+}
+
+void ACharacterBase::Attack()
+{
+	if (CanPerformAttack())
+	{
+		PerformAttack(lightAttackActionTag, combatComp->attackCount, false, false, 1.0f);
+	}
+}
+
+#pragma region IGameplayTagInterface
+
+const FGameplayTag& ACharacterBase::GetOwnedGameplayTag() const
+{
+	return ownedGameplayTag;
+}
+
+bool ACharacterBase::HasMatchingGameplayTag(FGameplayTagContainer tagsToCheck)
+{
+	return tagsToCheck.HasTag(ownedGameplayTag);
+}
+#pragma endregion IGameplayTagInterface
+
+
+#pragma region ICombatInterface
+
+void ACharacterBase::ContinueAttack()
+{
+	if (combatComp->bIsAttackSaved)
+	{
+		combatComp->bCanContinueAttack = false;
+		
+		if (stateManagerComp->GetCurrentState() != attackingStateTag)
+		{
+			Attack();
+			return;
+		}
+		else
+		{
+			stateManagerComp->ResetState();
+			Attack();
+		}
+	}
+	else
+	{
+		combatComp->bCanContinueAttack = true;
+	}
+}
+
+void ACharacterBase::ResetCombat()
+{
+	combatComp->ResetCombat();
+	stateManagerComp->ResetState();
+	stateManagerComp->ResetAction();
+}
+
+bool ACharacterBase::CanReciveDamage()
+{
+	FGameplayTagContainer statesToCheck;
+	statesToCheck.AddTag(deadStateTag);
+	statesToCheck.AddTag(dodgingStateTag);
+	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck);
+}
+
+FPerformDeath ACharacterBase::PerformDeath()
+{
+	FPerformDeath returnPerformDeath
+	{
+		{},
+		0.0f
+	};
+	if (!combatComp->GetMainWeapon()) return returnPerformDeath;
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	stateManagerComp->SetCurrentAction(dieActionTag);
+
+	TArray<TObjectPtr<ABaseEquippable>> currentEquipments = equipComp->GetCurrentEquipments();
+	for (TObjectPtr<ABaseEquippable> currentEquipment : currentEquipments)
+	{
+		returnPerformDeath.actorsToDestory.Add(currentEquipment);
+	}
+
+	combatComp->GetMainWeapon()->SimulateWeaponPhysics();
+	returnPerformDeath.actorsToDestory.Add(combatComp->GetMainWeapon());
+	TArray<TObjectPtr<UAnimMontage>> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(dieActionTag);
+	if (!actionMontageArray.IsEmpty()) EnableRagdoll();
+
+	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
+	float animDuration = GetMesh()->GetAnimInstance()->Montage_Play(actionMontageArray[randomIndex]);
+	returnPerformDeath.duration = animDuration;
+
+	AAIController* refAIController = Cast<AAIController>(GetController());
+	if (!refAIController) return returnPerformDeath;
+
+	refAIController->BrainComponent->StopLogic("Dead");
+	return returnPerformDeath;
+}
+
+bool ACharacterBase::PerformHitReaction(FVector hitLocation, float damage)
+{
+	stateManagerComp->SetCurrentAction(disabledStateTag);
+	if (ABaseWeapon* mainWeaponRef = combatComp->GetMainWeapon())
+	{
+		UAnimMontage* hitAnimMontage = nullptr;
+		switch (hitDirection)
+		{
+		case EHitDirection::Front:
+			hitAnimMontage = mainWeaponRef->hitMontage_F;
+			break;
+		case EHitDirection::Back:
+			hitAnimMontage = mainWeaponRef->hitMontage_B;
+			break;
+		case EHitDirection::Left:
+			hitAnimMontage = mainWeaponRef->hitMontage_L;
+			break;
+		case EHitDirection::Right:
+			hitAnimMontage = mainWeaponRef->hitMontage_R;
+			break;
+		default:
+			break;
+		}
+		if (hitAnimMontage)
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(hitAnimMontage, 1.0f,
+														EMontagePlayReturnType::Duration,
+														0.0f,
+														true);
+			return true;
+		}
+	}
+	return false;
+}
+
+FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGameplayTag characterAction,
+												int32 montageIndex, bool bRandomIndex)
+{
+	FPerformAction returnPerformAction
+	{
+		false,
+		0.0f
+	};
+	
+	if (!combatComp->GetMainWeapon()) return returnPerformAction;
+	
+	TArray<TObjectPtr<UAnimMontage>> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(characterAction);
+	if (actionMontageArray.Num() > 0) return returnPerformAction;
+	
+	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
+	int32 index = bRandomIndex ? randomIndex : montageIndex;
+	TObjectPtr<UAnimMontage> actionMontage = actionMontageArray.IsValidIndex(index) ? actionMontageArray[index] : nullptr;
+	if (!actionMontage) return returnPerformAction;
+
+	stateManagerComp->SetCurrentState(characterState);
+	stateManagerComp->SetCurrentAction(characterAction);
+	float actionDuration = GetMesh()->GetAnimInstance()->Montage_Play(actionMontage, 1.0f,
+												EMontagePlayReturnType::Duration,
+												0.0f,
+												true);
+	returnPerformAction.actionDuration = actionDuration;
+	returnPerformAction.bSuccess = true;
+	return returnPerformAction;
+}
+
+FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 attackInIndex, bool bRandomIndex,
+												bool bIsCalledByAI, float playRate)
+{
+	FPerformAttack Temp;
+	return Temp;
+}
+#pragma endregion ICombatInterface
+
+
+void ACharacterBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.0f && Delta <= 0.0f)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		DisableInput(PlayerController);
+	}
+}
+
+void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
+{
+	if (characterState.MatchesTagExact(deadStateTag))
+	{
+		FPerformDeath performDeath = PerformDeath();
+		
+		float delayTime = performDeath.duration + 4.0f;
+		TArray<AActor*> localActorsArray = performDeath.actorsToDestory;
+		TWeakObjectPtr<ACharacterBase> weakThis = this;
+		FTimerHandle timerHandleDestroyDeadActors;
+		
+		if (timerHandleDestroyDeadActors.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(timerHandleDestroyDeadActors);
+		}
+		GetWorld()->GetTimerManager().SetTimer(timerHandleDestroyDeadActors, 
+									[weakThis, localActorsArray]() 
+												{
+													if (weakThis.IsValid())
+													{
+														weakThis->DestroyAttachedActorsAndSelf(localActorsArray); 
+													}
+												},
+												delayTime, false);
+	}
+}
+
+void ACharacterBase::DestroyAttachedActorsAndSelf(const TArray<AActor*>& actorsArray)
+{
+	for (TObjectPtr<AActor> actor : actorsArray)
+	{
+		if (actor)
+		{
+			actor->Destroy();
+		}
+	}
+	Destroy();
+}
+
+void ACharacterBase::EnableRagdoll()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
+	//UNDONE
+}
+
