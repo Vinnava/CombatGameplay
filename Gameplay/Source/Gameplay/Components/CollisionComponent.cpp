@@ -78,7 +78,7 @@ void UCollisionComponent::CollisionTrace()
 
 	// Object types to trace
 	FCollisionObjectQueryParams objectParams;
-	for (ECollisionChannel Channel : traceObjectType)
+	for (ECollisionChannel Channel : traceObjectTypes)
 	{
 		objectParams.AddObjectTypesToQuery(Channel);
 	}

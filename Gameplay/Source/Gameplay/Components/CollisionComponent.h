@@ -25,7 +25,7 @@ private://Variables
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	float traceRadius;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-	TArray<TEnumAsByte<ECollisionChannel>> traceObjectType;
+	TArray<TEnumAsByte<ECollisionChannel>> traceObjectTypes;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	TArray<TObjectPtr<AActor>> actorsToIgnore;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")

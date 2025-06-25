@@ -15,6 +15,8 @@
 #include "Gameplay/Components/StatsComponent.h"
 #include "Gameplay/Data/GameplayData.h"
 #include "Gameplay/Data/GameplayTagData.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogBaseCharacter);
 
@@ -215,7 +217,7 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	
 	if (!combatComp->GetMainWeapon()) return returnPerformAction;
 	
-	TArray<TObjectPtr<UAnimMontage>> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(characterAction);
+	TArray<UAnimMontage*> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(characterAction);
 	if (actionMontageArray.Num() > 0) return returnPerformAction;
 	
 	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
@@ -226,19 +228,67 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	stateManagerComp->SetCurrentState(characterState);
 	stateManagerComp->SetCurrentAction(characterAction);
 	float actionDuration = GetMesh()->GetAnimInstance()->Montage_Play(actionMontage, 1.0f,
-												EMontagePlayReturnType::Duration,
-												0.0f,
-												true);
+																	EMontagePlayReturnType::Duration,
+																	0.0f,
+																	true);
 	returnPerformAction.actionDuration = actionDuration;
 	returnPerformAction.bSuccess = true;
 	return returnPerformAction;
 }
 
-FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 attackInIndex, bool bRandomIndex,
+FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 attackIndex, bool bRandomIndex,
 												bool bIsCalledByAI, float playRate)
 {
-	FPerformAttack Temp;
-	return Temp;
+	FPerformAttack returnPerformAttack
+	{
+		false,
+		0.0f
+	};
+	
+	if (!combatComp->GetMainWeapon()) return returnPerformAttack;
+	
+	TArray<UAnimMontage*> attackMontageArray = combatComp->GetMainWeapon()->GetActioMontages(attackType);
+	if (attackMontageArray.Num() > 0) return returnPerformAttack;
+	
+	int32 randomIndex = FMath::RandRange(0, attackMontageArray.Num() - 1);
+	int32 index = bRandomIndex ? randomIndex : attackIndex;
+	TObjectPtr<UAnimMontage> attackMontage = attackMontageArray.IsValidIndex(index) ? attackMontageArray[index] : nullptr;
+	if (!attackMontage) return returnPerformAttack;
+
+	stateManagerComp->SetCurrentState(attackingStateTag);
+	stateManagerComp->SetCurrentAction(attackType);
+
+	FHitResult hitResult;
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(), GetActorLocation(),
+													40.0f,objectTypes, false, {},
+													EDrawDebugTrace::None, hitResult, true);
+
+	FTransform transform;
+	
+	FVector targetLocation = (hitResult.bBlockingHit) ?
+		(UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::FindLookAtRotation(hitResult.GetActor()->GetActorLocation(), GetActorLocation()))
+		* 200 + hitResult.GetActor()->GetActorLocation()) : GetActorLocation();
+	transform.SetLocation(targetLocation);
+	
+	FRotator targeRotation = (hitResult.bBlockingHit) ?
+		UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitResult.GetActor()->GetActorLocation()) : GetActorRotation();
+	transform.SetRotation(targeRotation.Quaternion());
+
+	float attackDuration = GetMesh()->GetAnimInstance()->Montage_Play(attackMontage, 1.0f,
+																	EMontagePlayReturnType::Duration,
+																	0.0f,
+																	true);
+
+	combatComp->attackCount++;
+	int32 currentAttackIndex = combatComp->attackCount;
+	int32 lastMontageIndex = attackMontageArray.Num() - 1;
+	if (currentAttackIndex > lastMontageIndex) combatComp->attackCount = 0;
+
+	returnPerformAttack.attackDuration = attackDuration;
+	returnPerformAttack.bSuccess = true;
+	return returnPerformAttack;
 }
 #pragma endregion ICombatInterface
 
@@ -294,6 +344,10 @@ void ACharacterBase::DestroyAttachedActorsAndSelf(const TArray<AActor*>& actorsA
 void ACharacterBase::EnableRagdoll()
 {
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
-	//UNDONE
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionProfileName(TEXT("ragdoll"), true);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
+	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, true, true);
 }
 

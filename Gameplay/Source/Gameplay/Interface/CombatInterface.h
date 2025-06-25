@@ -48,7 +48,7 @@ public://Functions
 										int32 montageIndex,
 										bool randomIndex) = 0;
 	virtual FPerformAttack PerformAttack(FGameplayTag attackType,
-										int32 attackInIndex,
+										int32 attackIndex,
 										bool bRandomIndex,
 										bool bIsCalledByAI,
 										float playRate) = 0;
