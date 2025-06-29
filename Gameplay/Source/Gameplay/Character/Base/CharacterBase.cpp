@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "MotionWarpingComponent.h"
+#include "Chaos/Utilities.h"
 #include "Gameplay/Actors/Equippables/Base/BaseWeapon.h"
 #include "Gameplay/Components/CombatComponent.h"
 #include "Gameplay/Components/EquipmentComponent.h"
@@ -15,6 +16,7 @@
 #include "Gameplay/Components/StatsComponent.h"
 #include "Gameplay/Data/GameplayData.h"
 #include "Gameplay/Data/GameplayTagData.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -60,8 +62,11 @@ void ACharacterBase::PostInitializeComponents()
 
 void ACharacterBase::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
+
+	equipComp->InitializeEquipment();
+
+	OnTakePointDamage.AddDynamic(this, &ACharacterBase::HandlePointDamage);
 }
 
 bool ACharacterBase::CanPerformAttack() const
@@ -80,6 +85,100 @@ void ACharacterBase::Attack()
 	if (CanPerformAttack())
 	{
 		PerformAttack(lightAttackActionTag, combatComp->attackCount, false, false, 1.0f);
+	}
+}
+
+bool ACharacterBase::CanPerformDodge() const
+{
+	FGameplayTagContainer statesToCheck;
+	statesToCheck.AddTag(deadStateTag);
+	statesToCheck.AddTag(dodgingStateTag);
+	statesToCheck.AddTag(generalActionStateTag);
+	statesToCheck.AddTag(disabledStateTag);
+	
+	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && !(!combatComp->bIsCombatEnabled || GetCharacterMovement()->IsFalling());
+}
+
+void ACharacterBase::SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode)
+{
+	if (newMovementSpeedMode!=movementSpeedMode) return;
+	movementSpeedMode = newMovementSpeedMode;
+	switch (movementSpeedMode)
+	{
+		case EMovementSpeedMode::Walking :
+			GetCharacterMovement()->MaxWalkSpeed = maxWalkSpeed;
+			break;
+		case EMovementSpeedMode::Jogging :
+			GetCharacterMovement()->MaxWalkSpeed = maxJogSpeed;
+			break;
+		case EMovementSpeedMode::Sprinting :
+			GetCharacterMovement()->MaxWalkSpeed = maxSprintSpeed;
+			break;
+	}
+}
+
+EMovementSpeedMode ACharacterBase::GetMovementSpeedMode() const
+{
+	return movementSpeedMode;
+}
+
+EHitDirection ACharacterBase::UpdateAndGetHitDirection(FVector hitLocation) 
+{
+	FVector actorForward = GetActorForwardVector();
+	FVector actorRight = GetActorRightVector();
+	FVector toHit = UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), hitLocation);
+
+	float forwardDot = UKismetMathLibrary::Dot_VectorVector(actorForward, toHit);
+	if (forwardDot >= 0.3f)
+	{
+		hitDirection = EHitDirection::Front;
+		return hitDirection;
+	}
+	else if (forwardDot <= -0.4f)
+	{
+		hitDirection = EHitDirection::Back;
+		return hitDirection;
+	}
+	float rightDot = UKismetMathLibrary::Dot_VectorVector(actorRight, toHit);
+	hitDirection = (rightDot > 0.0f) ? EHitDirection::Right : EHitDirection::Left;
+	return hitDirection;
+}
+
+FRotator ACharacterBase::GetHitRotation() const
+{
+	FVector InputVector = GetLastMovementInputVector();
+
+	if (!InputVector.IsNearlyZero(0.001f))
+	{
+		// Return rotation based on input vector
+		return InputVector.Rotation();
+	}
+	else
+	{
+		// No input → return current actor rotation
+		return GetActorRotation();
+	}
+}
+
+void ACharacterBase::HandlePointDamage(AActor* damagedActor, float damage, AController* instigatedBy,
+                                       FVector hitLocation, UPrimitiveComponent* hitComponent, FName boneName,
+                                       FVector shotFromDirection, const UDamageType* damageType, AActor* damageCauser)
+{
+	if (!CanReciveDamage()) return;
+
+	UpdateAndGetHitDirection(hitLocation);
+	if (PerformHitReaction(hitLocation, damage))
+	{
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f);
+		float delayTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld()) * 1.2;
+		FTimerHandle timerHandleUpdateDamage;
+		TWeakObjectPtr<ACharacterBase> weakThis = this;
+		/*GetWorld()->GetTimerManager().SetTimer(timerHandleUpdateDamage,
+												[weakThis, ]()
+												{
+													
+												})*/
+		//UNDONE
 	}
 }
 
@@ -149,15 +248,15 @@ FPerformDeath ACharacterBase::PerformDeath()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	stateManagerComp->SetCurrentAction(dieActionTag);
 
-	TArray<TObjectPtr<ABaseEquippable>> currentEquipments = equipComp->GetCurrentEquipments();
-	for (TObjectPtr<ABaseEquippable> currentEquipment : currentEquipments)
+	TArray<ABaseEquippable*> currentEquipments = equipComp->GetCurrentEquipments();
+	for (ABaseEquippable* currentEquipment : currentEquipments)
 	{
 		returnPerformDeath.actorsToDestory.Add(currentEquipment);
 	}
 
 	combatComp->GetMainWeapon()->SimulateWeaponPhysics();
 	returnPerformDeath.actorsToDestory.Add(combatComp->GetMainWeapon());
-	TArray<TObjectPtr<UAnimMontage>> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(dieActionTag);
+	TArray<UAnimMontage*> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(dieActionTag);
 	if (!actionMontageArray.IsEmpty()) EnableRagdoll();
 
 	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
@@ -222,7 +321,7 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	
 	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
 	int32 index = bRandomIndex ? randomIndex : montageIndex;
-	TObjectPtr<UAnimMontage> actionMontage = actionMontageArray.IsValidIndex(index) ? actionMontageArray[index] : nullptr;
+	UAnimMontage* actionMontage = actionMontageArray.IsValidIndex(index) ? actionMontageArray[index] : nullptr;
 	if (!actionMontage) return returnPerformAction;
 
 	stateManagerComp->SetCurrentState(characterState);
@@ -341,7 +440,7 @@ void ACharacterBase::DestroyAttachedActorsAndSelf(const TArray<AActor*>& actorsA
 	Destroy();
 }
 
-void ACharacterBase::EnableRagdoll()
+void ACharacterBase::EnableRagdoll() const
 {
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);

@@ -15,6 +15,13 @@ enum class EHitDirection
 	Right
 };
 
+enum class EMovementSpeedMode
+{
+	Walking,
+	Jogging,
+	Sprinting,
+};
+
 UCLASS()
 class GAMEPLAY_API UGameplayData : public UObject
 {

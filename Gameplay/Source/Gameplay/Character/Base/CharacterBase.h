@@ -22,7 +22,7 @@ private://Variables
 	UPROPERTY(EditDefaultsOnly, Category = Initialize)
 	FName pelvisBoneName;
 
-	EMovementMode movementSpeedMode;
+	enum class EMovementSpeedMode movementSpeedMode;
 	enum class EHitDirection hitDirection;
 	
 protected://Variables
@@ -50,12 +50,20 @@ public://Variables
 
 private://Functions
 	void DestroyAttachedActorsAndSelf(const TArray<AActor*>& actorsArray);
-	void EnableRagdoll();
+	void EnableRagdoll() const;
+	//void 
 
 protected://Functions
 	virtual void BeginPlay();
 
+	void Attack();
+
 	bool CanPerformAttack() const;
+	bool CanPerformDodge() const;
+	void SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode);
+	EMovementSpeedMode GetMovementSpeedMode() const;
+	EHitDirection UpdateAndGetHitDirection(FVector hitLocation);
+	FRotator GetHitRotation() const;
 	
 #pragma region StatsComponentDelegates
 
@@ -68,7 +76,16 @@ public://Functions
 	ACharacterBase();
 	virtual void PostInitializeComponents() override;
 
-	void Attack();
+	UFUNCTION()
+	virtual void HandlePointDamage(AActor* damagedActor,
+									float damage,
+									AController* instigatedBy,
+									FVector hitLocation,
+									UPrimitiveComponent* hitComponent,
+									FName boneName,
+									FVector shotFromDirection,
+									const UDamageType* damageType,
+									AActor* damageCauser );
 	
 #pragma region IGameplayTagInterface
 	
