@@ -49,12 +49,14 @@ protected://Variables
 public://Variables
 
 private://Functions
-	void DestroyAttachedActorsAndSelf(const TArray<AActor*>& actorsArray);
 	void EnableRagdoll() const;
-	//void 
+	void ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation);
 
 protected://Functions
 	virtual void BeginPlay();
+
+	virtual float TakeDamage(float damage, FDamageEvent const& damageEvent, 
+							AController* eventInstigator, AActor* damageCauser) override;
 
 	void Attack();
 

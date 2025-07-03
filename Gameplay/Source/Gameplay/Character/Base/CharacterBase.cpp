@@ -9,6 +9,8 @@
 #include "GameFramework/Controller.h"
 #include "MotionWarpingComponent.h"
 #include "Chaos/Utilities.h"
+#include "Engine/DamageEvents.h"
+#include "Gameplay/Actors/Camera/CameraShake/AttackCameraShake.h"
 #include "Gameplay/Actors/Equippables/Base/BaseWeapon.h"
 #include "Gameplay/Components/CombatComponent.h"
 #include "Gameplay/Components/EquipmentComponent.h"
@@ -19,6 +21,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Perception/AISense_Damage.h"
 
 DEFINE_LOG_CATEGORY(LogBaseCharacter);
 
@@ -160,27 +163,117 @@ FRotator ACharacterBase::GetHitRotation() const
 	}
 }
 
-void ACharacterBase::HandlePointDamage(AActor* damagedActor, float damage, AController* instigatedBy,
-                                       FVector hitLocation, UPrimitiveComponent* hitComponent, FName boneName,
-                                       FVector shotFromDirection, const UDamageType* damageType, AActor* damageCauser)
+float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, AController* eventInstigator, AActor* damageCauser)
 {
-	if (!CanReciveDamage()) return;
+	float actualDamage = Super::TakeDamage(damage, damageEvent, eventInstigator, damageCauser);
+
+	if (!CanReciveDamage()) return 0;
+
+	FVector hitLocation;
+	if (damageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent& PointDamageEvent = static_cast<const FPointDamageEvent&>(damageEvent);
+		hitLocation = PointDamageEvent.HitInfo.ImpactPoint;
+	}
 
 	UpdateAndGetHitDirection(hitLocation);
-	if (PerformHitReaction(hitLocation, damage))
+
+	if (bool bCanDamege = PerformHitReaction(hitLocation, damage))
 	{
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f);
+		
 		float delayTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld()) * 1.2;
 		FTimerHandle timerHandleUpdateDamage;
 		TWeakObjectPtr<ACharacterBase> weakThis = this;
-		/*GetWorld()->GetTimerManager().SetTimer(timerHandleUpdateDamage,
-												[weakThis, ]()
+		GetWorld()->GetTimerManager().SetTimer(timerHandleUpdateDamage,
+												[weakThis, bCanDamege, damage, eventInstigator, hitLocation]()
 												{
-													
-												})*/
-		//UNDONE
+													if (weakThis.IsValid())
+													{
+														weakThis->ApplyDamage(bCanDamege, damage, eventInstigator, hitLocation);
+													}
+												}, delayTime, false);
+	}
+	
+	return actualDamage;
+}
+
+void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation)
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+	
+	APlayerController* pC = UGameplayStatics::GetPlayerController(this, 0);
+	if (pC->PlayerCameraManager)
+	{
+		pC->PlayerCameraManager->StartCameraShake( UAttackCameraShake::StaticClass(), 0.5f, ECameraShakePlaySpace::CameraLocal,
+												FRotator::ZeroRotator);
+	}
+
+	if (!bCanDamage) return;
+
+	APawn* instigatorPawn = instigatorController->GetPawn();
+	UAISense_Damage::ReportDamageEvent(GetWorld(), this, instigatorPawn, damage,hitLocation, hitLocation, TEXT("None"));
+	
+	if (!statsComp->ApplyHealthChange(damage*-1))
+	{
+		stateManagerComp->SetCurrentState(deadStateTag);
 	}
 }
+
+void ACharacterBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.0f && Delta <= 0.0f)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		DisableInput(PlayerController);
+	}
+}
+
+void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
+{
+	if (characterState.MatchesTagExact(deadStateTag))
+	{
+		FPerformDeath performDeath = PerformDeath();
+		
+		float delayTime = performDeath.duration + 4.0f;
+		TWeakObjectPtr<ACharacterBase> weakThis = this;
+		FTimerHandle timerHandleDestroyDeadActors;
+		FTimerDelegate timerDelegateDestroyDeadActors;
+
+		//Destroy Attached actors & Self
+		timerDelegateDestroyDeadActors.BindLambda([weakThis, performDeath]()
+		{
+			for (TObjectPtr<AActor> actor : performDeath.actorsToDestory)
+			{
+				if (actor)
+				{
+					actor->Destroy();
+				}
+			}
+			if (weakThis.IsValid())
+			{
+				weakThis->Destroy();
+			}
+		});
+		
+		if (timerHandleDestroyDeadActors.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(timerHandleDestroyDeadActors);
+		}
+		GetWorld()->GetTimerManager().SetTimer(timerHandleDestroyDeadActors, timerDelegateDestroyDeadActors, delayTime, false);
+	}
+}
+
+void ACharacterBase::EnableRagdoll() const
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionProfileName(TEXT("ragdoll"), true);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
+	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, true, true);
+}
+
 
 #pragma region IGameplayTagInterface
 
@@ -392,61 +485,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 #pragma endregion ICombatInterface
 
 
-void ACharacterBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
-{
-	if (NewHealth <= 0.0f && Delta <= 0.0f)
-	{
-		APlayerController* PlayerController = Cast<APlayerController>(GetController());
-		DisableInput(PlayerController);
-	}
-}
 
-void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
-{
-	if (characterState.MatchesTagExact(deadStateTag))
-	{
-		FPerformDeath performDeath = PerformDeath();
-		
-		float delayTime = performDeath.duration + 4.0f;
-		TArray<AActor*> localActorsArray = performDeath.actorsToDestory;
-		TWeakObjectPtr<ACharacterBase> weakThis = this;
-		FTimerHandle timerHandleDestroyDeadActors;
-		
-		if (timerHandleDestroyDeadActors.IsValid())
-		{
-			GetWorld()->GetTimerManager().ClearTimer(timerHandleDestroyDeadActors);
-		}
-		GetWorld()->GetTimerManager().SetTimer(timerHandleDestroyDeadActors, 
-									[weakThis, localActorsArray]() 
-												{
-													if (weakThis.IsValid())
-													{
-														weakThis->DestroyAttachedActorsAndSelf(localActorsArray); 
-													}
-												},
-												delayTime, false);
-	}
-}
 
-void ACharacterBase::DestroyAttachedActorsAndSelf(const TArray<AActor*>& actorsArray)
-{
-	for (TObjectPtr<AActor> actor : actorsArray)
-	{
-		if (actor)
-		{
-			actor->Destroy();
-		}
-	}
-	Destroy();
-}
 
-void ACharacterBase::EnableRagdoll() const
-{
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	GetMesh()->SetCollisionProfileName(TEXT("ragdoll"), true);
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
-	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, true, true);
-}
 
