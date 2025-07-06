@@ -68,8 +68,6 @@ void ACharacterBase::BeginPlay()
 	Super::BeginPlay();
 
 	equipComp->InitializeEquipment();
-
-	OnTakePointDamage.AddDynamic(this, &ACharacterBase::HandlePointDamage);
 }
 
 bool ACharacterBase::CanPerformAttack() const

@@ -19,9 +19,6 @@ class ACharacterBase : public ACharacter, public IGameplayTagInterface, public I
 	GENERATED_BODY()
 
 private://Variables
-	UPROPERTY(EditDefaultsOnly, Category = Initialize)
-	FName pelvisBoneName;
-
 	enum class EMovementSpeedMode movementSpeedMode;
 	enum class EHitDirection hitDirection;
 	
@@ -41,6 +38,9 @@ protected://Variables
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Initialize)
 	FGameplayTag ignoreGameplayTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = Initialize)
+	FName pelvisBoneName;
 	
 	float maxWalkSpeed;
 	float maxJogSpeed;
@@ -49,7 +49,6 @@ protected://Variables
 public://Variables
 
 private://Functions
-	void EnableRagdoll() const;
 	void ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation);
 
 protected://Functions
@@ -59,6 +58,7 @@ protected://Functions
 							AController* eventInstigator, AActor* damageCauser) override;
 
 	void Attack();
+	virtual void EnableRagdoll() const;
 
 	bool CanPerformAttack() const;
 	bool CanPerformDodge() const;
@@ -77,17 +77,6 @@ protected://Functions
 public://Functions
 	ACharacterBase();
 	virtual void PostInitializeComponents() override;
-
-	UFUNCTION()
-	virtual void HandlePointDamage(AActor* damagedActor,
-									float damage,
-									AController* instigatedBy,
-									FVector hitLocation,
-									UPrimitiveComponent* hitComponent,
-									FName boneName,
-									FVector shotFromDirection,
-									const UDamageType* damageType,
-									AActor* damageCauser );
 	
 #pragma region IGameplayTagInterface
 	
