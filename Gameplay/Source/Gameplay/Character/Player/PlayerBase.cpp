@@ -7,6 +7,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "CharacterTrajectoryComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Gameplay/UI/Player/PlayerWidget.h"
 
 
 APlayerBase::APlayerBase()
@@ -21,6 +25,13 @@ APlayerBase::APlayerBase()
 	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Creating Camera Bobbler
+	cameraBobbler = CreateDefaultSubobject<USceneComponent>(TEXT("CameraBobbler"));
+	cameraBobbler->SetupAttachment(GetMesh(), TEXT("head"));
+
+	//Creating MotionTrajectory Component
+	characterTrajectoryComp = CreateDefaultSubobject<UCharacterTrajectoryComponent>(TEXT("characterTrajectoryComponent"));
 }
 
 void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -84,4 +95,41 @@ void APlayerBase::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void APlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	playerController = Cast<APlayerController>(GetController());
+}
+
+void APlayerBase::EnableRagdoll() const
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	cameraBoom->AttachToComponent(GetMesh(),  FAttachmentTransformRules::KeepWorldTransform, pelvisBoneName);
+	cameraBoom->bDoCollisionTest = false;
+	GetMesh()->SetCollisionProfileName(TEXT("ragdoll"), true);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
+	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, true, true);
+}
+
+FPerformDeath APlayerBase::PerformDeath()
+{
+	FInputModeUIOnly inputModeData;
+	inputModeData.SetWidgetToFocus(playerWidgetRef->TakeWidget());
+	inputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	playerController->SetInputMode(inputModeData);
+	
+	playerController->bShowMouseCursor = true;
+	playerWidgetRef->RestatWidget();
+	
+	return Super::PerformDeath();
+}
+
+void APlayerBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
+{
+	//UNDONE
 }

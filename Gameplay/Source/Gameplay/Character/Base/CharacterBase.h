@@ -70,8 +70,8 @@ protected://Functions
 #pragma region StatsComponentDelegates
 
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta);
-	void OnCharacterStateBegin(FGameplayTag characterState);
+	virtual void OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta);
+	virtual void OnCharacterStateBegin(FGameplayTag characterState);
 #pragma endregion StatsComponentDelegates
 	
 public://Functions

@@ -9,6 +9,6 @@ public class Gameplay : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] { "AIModule", "MotionWarping", "GameplayCameras", "GameplayCameras" });
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTags" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTags", "MotionTrajectory" });
 	}
 }
