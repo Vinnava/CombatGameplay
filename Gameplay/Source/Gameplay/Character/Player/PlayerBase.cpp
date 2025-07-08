@@ -10,6 +10,7 @@
 #include "CharacterTrajectoryComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Gameplay/UI/Player/HealthBarWidget.h"
 #include "Gameplay/UI/Player/PlayerWidget.h"
 
 
@@ -129,7 +130,7 @@ FPerformDeath APlayerBase::PerformDeath()
 	return Super::PerformDeath();
 }
 
-void APlayerBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
+void APlayerBase::OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta)
 {
-	//UNDONE
+	playerWidgetRef->healthWidget->UpdateHealth(newHealth);
 }

@@ -6,33 +6,33 @@
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
 {
-	HealthMax = 100;
-	Health = HealthMax;
+	healthMax = 100;
+	health = healthMax;
 }
 
 
 bool UStatsComponent::IsAlive() const
 {
-	return Health > 0.0f;
+	return health > 0.0f;
 }
 
 
 float UStatsComponent::GetHealthMax() const
 {
-	return HealthMax;
+	return healthMax;
 }
 
 
 bool UStatsComponent::ApplyHealthChange(float Delta)
 {
-	float OldHealth = Health;
+	float Oldhealth = health;
 	
-	Health = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
+	health = FMath::Clamp(health + Delta, 0.0f, healthMax);
 	
-	//UEngine::AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(FString("Health: %f"), Health));
+	//UEngine::AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(FString("health: %f"), health));
 
-	float ActualDelta = Health - OldHealth;
-	OnHealthChanged.Broadcast(nullptr, this, Health, ActualDelta);
+	float ActualDelta = health - Oldhealth;
+	OnHealthChanged.Broadcast(nullptr, this, health, ActualDelta);
 	
 	return ActualDelta != 0;
 	

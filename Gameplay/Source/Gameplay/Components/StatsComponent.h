@@ -8,10 +8,10 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged,
-											AActor*, InstigatorActor,
-											UStatsComponent*, OwningComp,
-											float, NewHealth,
-											float, Delta);
+											AActor*, instigatorActor,
+											UStatsComponent*, owningComp,
+											float, newHealth,
+											float, delta);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -26,10 +26,10 @@ public:
 protected:
 //Variables
 	UPROPERTY(VisibleAnywhere, Category="Attributes")
-	float Health;
+	float health;
 
 	UPROPERTY(EditDefaultsOnly, Category="Attributes")
-	float HealthMax;
+	float healthMax;
 
 public:
 //Function
@@ -44,5 +44,5 @@ public:
 
 //Variables
 	UPROPERTY(BlueprintAssignable, Category="Attributes")
-	FOnHealthChanged OnHealthChanged;		
+	FOnHealthChanged OnHealthChanged;	
 };

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "PlayerWidget.generated.h"
+#include "HealthBarWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAMEPLAY_API UPlayerWidget : public UUserWidget
+class GAMEPLAY_API UHealthBarWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -21,8 +21,7 @@ protected://Variables
 
 
 public://Variables
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<class UHealthBarWidget> healthWidget;
+
 
 private://Functions
 
@@ -31,6 +30,6 @@ protected://Functions
 
 	
 public://Functions
-	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
-	void RestatWidget();
+	UFUNCTION(BlueprintImplementableEvent ,Category = "HealthBarWidget")
+	void UpdateHealth(float health); 
 };

@@ -61,7 +61,7 @@ protected://Functions
 	
 	virtual void EnableRagdoll() const override;
 	virtual FPerformDeath PerformDeath() override;
-	virtual void OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta) override;
+	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta) override;
 	
 public://Functions
 	APlayerBase();
