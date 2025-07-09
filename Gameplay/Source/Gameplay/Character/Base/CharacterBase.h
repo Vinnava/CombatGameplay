@@ -65,7 +65,7 @@ protected://Functions
 	void SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode);
 	EMovementSpeedMode GetMovementSpeedMode() const;
 	EHitDirection UpdateAndGetHitDirection(FVector hitLocation);
-	FRotator GetHitRotation() const;
+	FRotator GetDesiredRotation() const;
 	
 #pragma region StatsComponentDelegates
 

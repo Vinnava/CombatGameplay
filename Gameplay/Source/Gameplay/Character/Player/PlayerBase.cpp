@@ -8,10 +8,14 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "CharacterTrajectoryComponent.h"
+#include "MotionWarpingComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Gameplay/Components/CombatComponent.h"
+#include "Gameplay/Components/StateManagerComponent.h"
 #include "Gameplay/UI/Player/HealthBarWidget.h"
 #include "Gameplay/UI/Player/PlayerWidget.h"
+#include "Gameplay/Data/GameplayTagData.h"
 
 
 APlayerBase::APlayerBase()
@@ -35,6 +39,21 @@ APlayerBase::APlayerBase()
 	characterTrajectoryComp = CreateDefaultSubobject<UCharacterTrajectoryComponent>(TEXT("characterTrajectoryComponent"));
 }
 
+void APlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	playerController = Cast<APlayerController>(GetController());
+}
+
+void APlayerBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	BobbleCamera();
+}
+
+#pragma region InputComponents
+
 void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
@@ -54,6 +73,12 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		// Looking
 		EnhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerBase::Look);
+
+		// LightAttack
+		EnhancedInputComponent->BindAction(lightAttack, ETriggerEvent::Started, this, &APlayerBase::LightAttack);
+
+		// Dodge
+		EnhancedInputComponent->BindAction(dodge, ETriggerEvent::Started, this, &APlayerBase::Dodge);
 	}
 	else
 	{
@@ -84,7 +109,6 @@ void APlayerBase::Move(const FInputActionValue& Value)
 	}
 }
 
-
 void APlayerBase::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -98,11 +122,39 @@ void APlayerBase::Look(const FInputActionValue& Value)
 	}
 }
 
-void APlayerBase::BeginPlay()
+void APlayerBase::LightAttack(const FInputActionValue& value)
 {
-	Super::BeginPlay();
+	if (stateManagerComp->GetCurrentState() != attackingStateTag)
+	{
+		Attack();
+		return;
+	}
+	if (!combatComp->bCanContinueAttack)
+	{
+		combatComp->bIsAttackSaved = true;
+		return;
+	}
+	combatComp->bIsAttackSaved = false;
+	stateManagerComp->ResetState();
+	Attack();
+}
 
-	playerController = Cast<APlayerController>(GetController());
+void APlayerBase::Dodge(const FInputActionValue& value)
+{
+	if (!CanPerformDodge()) return;
+
+	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(dodgeWarpTargetName, GetActorLocation(), GetDesiredRotation());
+	PerformAction(dodgingStateTag, dodgeActionTag, 0, false);
+}
+
+#pragma endregion InputComponents
+
+void APlayerBase::BobbleCamera()
+{
+	FVector start = cameraBoom->GetComponentLocation();
+	FVector end = cameraBobbler->GetComponentLocation();
+	FVector halfway = FMath::Lerp(start, end, 0.05f);
+	cameraBoom->SetWorldLocation(halfway, false, nullptr);
 }
 
 void APlayerBase::EnableRagdoll() const

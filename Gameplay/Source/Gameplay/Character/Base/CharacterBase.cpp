@@ -145,7 +145,7 @@ EHitDirection ACharacterBase::UpdateAndGetHitDirection(FVector hitLocation)
 	return hitDirection;
 }
 
-FRotator ACharacterBase::GetHitRotation() const
+FRotator ACharacterBase::GetDesiredRotation() const
 {
 	FVector InputVector = GetLastMovementInputVector();
 

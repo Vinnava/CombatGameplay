@@ -26,8 +26,27 @@ private://Variables
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* lookAction;
+	UInputAction* lookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* lightAttack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* dodge;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* toggleWalk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* toggleTutorial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* toggleMenu;
+	
 #pragma endregion InputVariables
+
+	UPROPERTY(EditDefaultsOnly, Category = "Initizalize|MotionWarping")
+	FName dodgeWarpTargetName;
 	
 protected://Variables
 	TObjectPtr<class UCameraComponent> followCamera;
@@ -43,10 +62,10 @@ public://Variables
 	TObjectPtr<class UPlayerWidget> playerWidgetRef;
 
 private://Functions
-
+	void BobbleCamera();
 
 protected://Functions
-#pragma region Input
+#pragma region InputComponents
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -55,9 +74,13 @@ protected://Functions
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-#pragma endregion Input
+
+	void LightAttack(const FInputActionValue& value);
+	void Dodge(const FInputActionValue& value);
+#pragma endregion InputComponents
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	
 	virtual void EnableRagdoll() const override;
 	virtual FPerformDeath PerformDeath() override;
