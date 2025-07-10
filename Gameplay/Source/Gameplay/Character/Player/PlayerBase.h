@@ -20,6 +20,9 @@ private://Variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* defaultMappingContext;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext* menuMappingContext;
+
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* moveAction;
@@ -47,6 +50,8 @@ private://Variables
 
 	UPROPERTY(EditDefaultsOnly, Category = "Initizalize|MotionWarping")
 	FName dodgeWarpTargetName;
+	
+	bool bIsMenuUp;
 	
 protected://Variables
 	TObjectPtr<class UCameraComponent> followCamera;
@@ -77,16 +82,20 @@ protected://Functions
 
 	void LightAttack(const FInputActionValue& value);
 	void Dodge(const FInputActionValue& value);
+	void ToggleWalk(const FInputActionValue& value);
+	void ToggleToturial(const FInputActionValue& value);
+	void ToggleMenu(const FInputActionValue& value);
 #pragma endregion InputComponents
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	
+
 	virtual void EnableRagdoll() const override;
-	virtual FPerformDeath PerformDeath() override;
-	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta) override;
 	
 public://Functions
 	APlayerBase();
+	
+	virtual FPerformDeath PerformDeath() override;
+	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta) override;
 };
 

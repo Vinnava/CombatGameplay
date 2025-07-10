@@ -33,4 +33,8 @@ protected://Functions
 public://Functions
 	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
 	void RestatWidget();
+	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
+	void ToggleTutorial();
+	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
+	void RemoveRestartWidget();
 };

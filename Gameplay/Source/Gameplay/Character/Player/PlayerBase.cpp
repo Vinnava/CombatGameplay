@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gameplay/Components/CombatComponent.h"
 #include "Gameplay/Components/StateManagerComponent.h"
+#include "Gameplay/Data/GameplayData.h"
 #include "Gameplay/UI/Player/HealthBarWidget.h"
 #include "Gameplay/UI/Player/PlayerWidget.h"
 #include "Gameplay/Data/GameplayTagData.h"
@@ -42,8 +43,7 @@ APlayerBase::APlayerBase()
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	playerController = Cast<APlayerController>(GetController());
+	
 }
 
 void APlayerBase::Tick(float DeltaTime)
@@ -147,6 +147,64 @@ void APlayerBase::Dodge(const FInputActionValue& value)
 	PerformAction(dodgingStateTag, dodgeActionTag, 0, false);
 }
 
+void APlayerBase::ToggleWalk(const FInputActionValue& value)
+{
+	if (GetMovementSpeedMode() == EMovementSpeedMode::Walking)
+	{
+		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
+	}
+	else if (GetMovementSpeedMode() == EMovementSpeedMode::Jogging)
+	{
+		SetMovementSpeedMode(EMovementSpeedMode::Walking);
+	}
+}
+
+void APlayerBase::ToggleToturial(const FInputActionValue& value)
+{
+	playerWidgetRef->ToggleTutorial();
+}
+
+void APlayerBase::ToggleMenu(const FInputActionValue& value)
+{
+	if (bIsMenuUp == true)
+	{
+		bIsMenuUp = false;
+		
+		playerController = GetWorld()->GetFirstPlayerController();
+		FInputModeGameOnly inputMode;
+		playerController->SetInputMode(inputMode);
+		
+		playerController->SetShowMouseCursor(false);
+		playerWidgetRef->RemoveRestartWidget();
+		
+		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+		{
+			subsystem->RemoveMappingContext(menuMappingContext);
+			subsystem->AddMappingContext(defaultMappingContext, 0);
+		}
+	}
+	else
+	{
+		bIsMenuUp = true;
+
+		playerController = GetWorld()->GetFirstPlayerController();
+		FInputModeGameAndUI inputMode;
+		inputMode.SetWidgetToFocus(playerWidgetRef->TakeWidget());
+		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		inputMode.SetHideCursorDuringCapture(true);
+		playerController->SetInputMode(inputMode);
+
+		playerController->SetShowMouseCursor(true);
+		playerWidgetRef->RestatWidget();
+
+		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+		{
+			subsystem->RemoveMappingContext(defaultMappingContext);
+			subsystem->AddMappingContext(menuMappingContext, 0);
+		}
+	}
+}
+
 #pragma endregion InputComponents
 
 void APlayerBase::BobbleCamera()
@@ -171,12 +229,13 @@ void APlayerBase::EnableRagdoll() const
 
 FPerformDeath APlayerBase::PerformDeath()
 {
+	playerController = GetWorld()->GetFirstPlayerController();
 	FInputModeUIOnly inputModeData;
 	inputModeData.SetWidgetToFocus(playerWidgetRef->TakeWidget());
 	inputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	playerController->SetInputMode(inputModeData);
 	
-	playerController->bShowMouseCursor = true;
+	playerController->SetShowMouseCursor(true);
 	playerWidgetRef->RestatWidget();
 	
 	return Super::PerformDeath();

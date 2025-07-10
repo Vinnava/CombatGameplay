@@ -51,6 +51,13 @@ public://Variables
 private://Functions
 	void ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation);
 
+#pragma region ComponentDelegates
+
+	UFUNCTION()
+	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta);
+	virtual void OnCharacterStateBegin(FGameplayTag characterState);
+#pragma endregion ComponentDelegates
+
 protected://Functions
 	virtual void BeginPlay();
 
@@ -66,13 +73,6 @@ protected://Functions
 	EMovementSpeedMode GetMovementSpeedMode() const;
 	EHitDirection UpdateAndGetHitDirection(FVector hitLocation);
 	FRotator GetDesiredRotation() const;
-	
-#pragma region StatsComponentDelegates
-
-	UFUNCTION()
-	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta);
-	virtual void OnCharacterStateBegin(FGameplayTag characterState);
-#pragma endregion StatsComponentDelegates
 	
 public://Functions
 	ACharacterBase();
