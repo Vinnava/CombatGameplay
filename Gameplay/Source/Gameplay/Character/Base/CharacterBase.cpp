@@ -59,8 +59,8 @@ void ACharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	
-	statsComp->OnHealthChanged.AddDynamic(this,&ACharacterBase::OnHealthChanged);
-	stateManagerComp->OnCharacterStateBegin.AddUObject(this,&ACharacterBase::OnCharacterStateBegin);
+	statsComp->OnHealthChanged.AddDynamic(this, &ACharacterBase::OnHealthChanged);
+	stateManagerComp->OnCharacterStateBegin.AddUObject(this, &ACharacterBase::OnCharacterStateBegin);
 }
 
 void ACharacterBase::BeginPlay()

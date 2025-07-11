@@ -28,8 +28,7 @@ protected://Variables
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
 	TObjectPtr<class UStateManagerComponent> stateManagerComp ;
-
-	TObjectPtr<class UCombatComponent> combatComp;
+	
 	TObjectPtr<class UEquipmentComponent> equipComp;
 	TObjectPtr<class UMotionWarpingComponent> motionWarpingComp;
 
@@ -47,7 +46,8 @@ protected://Variables
 	float maxSprintSpeed;
 
 public://Variables
-
+	TObjectPtr<class UCombatComponent> combatComp;
+	
 private://Functions
 	void ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation);
 
