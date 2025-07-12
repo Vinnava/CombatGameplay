@@ -24,6 +24,7 @@ const FGameplayTag dodgingStateTag = FGameplayTag::RequestGameplayTag(TEXT("Char
 const FGameplayTag generalActionStateTag = FGameplayTag::RequestGameplayTag(TEXT("Character.State.GeneralAction"));
 #pragma endregion StateTag
 
+const FGameplayTag playerTag = FGameplayTag::RequestGameplayTag(TEXT("Character.Player"));
 
 UCLASS()
 class GAMEPLAY_API UGameplayTagData : public UObject

@@ -27,13 +27,19 @@ public://Variables
 
 private://Functions
 	virtual void OnPossess(APawn* InPawn) override;
+
+	UFUNCTION()
+	void OnPerceptionUpdated(const TArray<AActor*>& sensedActors);
 	
 	void SetBlackboardCombatEnable(bool enableCombat);
+	void SetBlackboardTagetActor(AActor* actor);
 
 protected://Functions
 
 	
 public://Functions
-	
-	
+	AAICEnemy();
+	virtual void PostInitializeComponents() override;
+
+	void ToggleCanAttack(bool bCanAttack);
 };
