@@ -17,33 +17,33 @@ class GAMEPLAY_API APlayerBase : public ACharacterBase
 private://Variables
 #pragma region InputVariables
 	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* defaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* menuMappingContext;
 
 	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* moveAction;
 
 	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* lookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* lightAttack;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* dodge;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* toggleWalk;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* toggleTutorial;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* toggleMenu;
 	
 #pragma endregion InputVariables
@@ -54,16 +54,23 @@ private://Variables
 	bool bIsMenuUp;
 	
 protected://Variables
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UCameraComponent> followCamera;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class USpringArmComponent> cameraBoom;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> cameraBobbler;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UCharacterTrajectoryComponent> characterTrajectoryComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	FVector2D movementValue;
 
 public://Variables
-	TObjectPtr<APlayerController> playerController;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = WidgetRef)
 	TObjectPtr<class UPlayerWidget> playerWidgetRef;
 
 private://Functions

@@ -19,15 +19,15 @@ class GAMEPLAY_API ABaseEquippable : public AActor, public IGameplayTagInterface
 private://variables
 	bool bIsEquipped{false};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-	FName attachSocketName;
-
 protected://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
 	TObjectPtr<UPrimitiveComponent> itemMesh;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = GameplayTag)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|GameplayTag")
 	FGameplayTag ownedGameplayTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+	FName attachSocketName;
 
 public://Variables
 

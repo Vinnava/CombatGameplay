@@ -23,13 +23,16 @@ private://Variables
 	enum class EHitDirection hitDirection;
 	
 protected://Variables
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UStatsComponent> statsComp;
-
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Components)
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UStateManagerComponent> stateManagerComp ;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UEquipmentComponent> equipComp;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UMotionWarpingComponent> motionWarpingComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Initialize)
@@ -46,6 +49,7 @@ protected://Variables
 	float maxSprintSpeed;
 
 public://Variables
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UCombatComponent> combatComp;
 	
 private://Functions

@@ -13,9 +13,10 @@ UCLASS()
 class GAMEPLAY_API UToggleCanAttackAN : public UAnimNotify
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	bool bCanAttack;
 	
 	virtual void Notify(USkeletalMeshComponent* meshComp, UAnimSequenceBase* animation, const FAnimNotifyEventReference& eventReference) override;
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Notify")
+	bool bCanAttack;
 };

@@ -170,7 +170,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 	{
 		bIsMenuUp = false;
 		
-		playerController = GetWorld()->GetFirstPlayerController();
+		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 		FInputModeGameOnly inputMode;
 		playerController->SetInputMode(inputMode);
 		
@@ -187,7 +187,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 	{
 		bIsMenuUp = true;
 
-		playerController = GetWorld()->GetFirstPlayerController();
+		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 		FInputModeGameAndUI inputMode;
 		inputMode.SetWidgetToFocus(playerWidgetRef->TakeWidget());
 		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -229,7 +229,7 @@ void APlayerBase::EnableRagdoll() const
 
 FPerformDeath APlayerBase::PerformDeath()
 {
-	playerController = GetWorld()->GetFirstPlayerController();
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 	FInputModeUIOnly inputModeData;
 	inputModeData.SetWidgetToFocus(playerWidgetRef->TakeWidget());
 	inputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);

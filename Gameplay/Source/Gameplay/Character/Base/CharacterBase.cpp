@@ -30,6 +30,9 @@ ACharacterBase::ACharacterBase()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+
+	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
 		
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -49,9 +52,9 @@ ACharacterBase::ACharacterBase()
 	//Creating Components
 	statsComp = CreateDefaultSubobject<UStatsComponent>("StatsComponent");
 	stateManagerComp = CreateDefaultSubobject<UStateManagerComponent>("StateManagerComponent");
-	combatComp = CreateDefaultSubobject<UCombatComponent>("NCombatComponent");
-	equipComp = CreateDefaultSubobject<UEquipmentComponent>("NEquipmentComponent");
-	motionWarpingComp = CreateDefaultSubobject<UMotionWarpingComponent>("NMotionWarpingComponent");
+	combatComp = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
+	equipComp = CreateDefaultSubobject<UEquipmentComponent>("EquipmentComponent");
+	motionWarpingComp = CreateDefaultSubobject<UMotionWarpingComponent>("MotionWarpingComponent");
 }
 
 

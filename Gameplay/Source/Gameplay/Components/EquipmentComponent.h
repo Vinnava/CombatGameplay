@@ -8,7 +8,6 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipementComponent, Log, All);
 
-class ABaseEquippable;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAMEPLAY_API UEquipmentComponent : public UActorComponent
@@ -16,9 +15,9 @@ class GAMEPLAY_API UEquipmentComponent : public UActorComponent
 	GENERATED_BODY()
 	
 private://Variables
+	TArray<TObjectPtr<class ABaseEquippable>> currentEquipments;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization", meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<ABaseEquippable>> currentEquipments;
-	
 	TArray<TSubclassOf<ABaseEquippable>> startingEquipments;
 
 public://Functions
