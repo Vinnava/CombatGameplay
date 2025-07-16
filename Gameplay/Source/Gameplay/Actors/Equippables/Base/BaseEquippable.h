@@ -9,7 +9,7 @@
 #include "BaseEquippable.generated.h"
 
 
-DECLARE_LOG_CATEGORY_EXTERN(LogBaseEquippable, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(GPLogBaseEquippable, Log, All);
 
 UCLASS()
 class GAMEPLAY_API ABaseEquippable : public AActor, public IGameplayTagInterface

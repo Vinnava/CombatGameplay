@@ -17,7 +17,7 @@
 #include "Gameplay/Components/StateManagerComponent.h"
 #include "Gameplay/Components/StatsComponent.h"
 #include "Gameplay/Data/GameplayData.h"
-#include "Gameplay/Data/GameplayTagData.h"
+#include "Gameplay/Data/GameplayTagLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -76,11 +76,11 @@ void ACharacterBase::BeginPlay()
 bool ACharacterBase::CanPerformAttack() const
 {
 	FGameplayTagContainer statesToCheck;
-	statesToCheck.AddTag(deadStateTag);
-	statesToCheck.AddTag(dodgingStateTag);
-	statesToCheck.AddTag(disabledStateTag);
-	statesToCheck.AddTag(generalActionStateTag);
-	statesToCheck.AddTag(attackingStateTag);
+	statesToCheck.AddTag(GameplayTags::State::Dead());
+	statesToCheck.AddTag(GameplayTags::State::Dodging());
+	statesToCheck.AddTag(GameplayTags::State::Disabled());
+	statesToCheck.AddTag(GameplayTags::State::GeneralAction());
+	statesToCheck.AddTag(GameplayTags::State::Attacking());
 	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && combatComp->bIsCombatEnabled;
 }
 
@@ -88,17 +88,17 @@ void ACharacterBase::Attack()
 {
 	if (CanPerformAttack())
 	{
-		PerformAttack(lightAttackActionTag, combatComp->attackCount, false, false, 1.0f);
+		PerformAttack(GameplayTags::Action::LightAttack(), combatComp->attackCount, false, false, 1.0f);
 	}
 }
 
 bool ACharacterBase::CanPerformDodge() const
 {
 	FGameplayTagContainer statesToCheck;
-	statesToCheck.AddTag(deadStateTag);
-	statesToCheck.AddTag(dodgingStateTag);
-	statesToCheck.AddTag(generalActionStateTag);
-	statesToCheck.AddTag(disabledStateTag);
+	statesToCheck.AddTag(GameplayTags::State::Dead());
+	statesToCheck.AddTag(GameplayTags::State::Dodging());
+	statesToCheck.AddTag(GameplayTags::State::Disabled());
+	statesToCheck.AddTag(GameplayTags::State::GeneralAction());
 	
 	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && !(!combatComp->bIsCombatEnabled || GetCharacterMovement()->IsFalling());
 }
@@ -217,7 +217,7 @@ void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* ins
 	
 	if (!statsComp->ApplyHealthChange(damage*-1))
 	{
-		stateManagerComp->SetCurrentState(deadStateTag);
+		stateManagerComp->SetCurrentState(GameplayTags::State::Dead());
 	}
 }
 
@@ -232,7 +232,7 @@ void ACharacterBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* O
 
 void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
 {
-	if (characterState.MatchesTagExact(deadStateTag))
+	if (characterState.MatchesTagExact(GameplayTags::State::Dead()))
 	{
 		FPerformDeath performDeath = PerformDeath();
 		
@@ -298,7 +298,7 @@ void ACharacterBase::ContinueAttack()
 	{
 		combatComp->bCanContinueAttack = false;
 		
-		if (stateManagerComp->GetCurrentState() != attackingStateTag)
+		if (stateManagerComp->GetCurrentState() != GameplayTags::State::Attacking())
 		{
 			Attack();
 			return;
@@ -325,8 +325,8 @@ void ACharacterBase::ResetCombat()
 bool ACharacterBase::CanReciveDamage()
 {
 	FGameplayTagContainer statesToCheck;
-	statesToCheck.AddTag(deadStateTag);
-	statesToCheck.AddTag(dodgingStateTag);
+	statesToCheck.AddTag(GameplayTags::State::Dead());
+	statesToCheck.AddTag(GameplayTags::State::Dodging());
 	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck);
 }
 
@@ -340,7 +340,7 @@ FPerformDeath ACharacterBase::PerformDeath()
 	if (!combatComp->GetMainWeapon()) return returnPerformDeath;
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-	stateManagerComp->SetCurrentAction(dieActionTag);
+	stateManagerComp->SetCurrentAction(GameplayTags::Action::Die());
 
 	TArray<ABaseEquippable*> currentEquipments = equipComp->GetCurrentEquipments();
 	for (ABaseEquippable* currentEquipment : currentEquipments)
@@ -350,7 +350,7 @@ FPerformDeath ACharacterBase::PerformDeath()
 
 	combatComp->GetMainWeapon()->SimulateWeaponPhysics();
 	returnPerformDeath.actorsToDestory.Add(combatComp->GetMainWeapon());
-	TArray<UAnimMontage*> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(dieActionTag);
+	TArray<UAnimMontage*> actionMontageArray = combatComp->GetMainWeapon()->GetActionMontages(GameplayTags::Action::Die());
 	if (!actionMontageArray.IsEmpty()) EnableRagdoll();
 
 	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
@@ -366,7 +366,7 @@ FPerformDeath ACharacterBase::PerformDeath()
 
 bool ACharacterBase::PerformHitReaction(FVector hitLocation, float damage)
 {
-	stateManagerComp->SetCurrentAction(disabledStateTag);
+	stateManagerComp->SetCurrentAction(GameplayTags::State::Disabled());
 	if (ABaseWeapon* mainWeaponRef = combatComp->GetMainWeapon())
 	{
 		UAnimMontage* hitAnimMontage = nullptr;
@@ -410,7 +410,7 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	
 	if (!combatComp->GetMainWeapon()) return returnPerformAction;
 	
-	TArray<UAnimMontage*> actionMontageArray = combatComp->GetMainWeapon()->GetActioMontages(characterAction);
+	TArray<UAnimMontage*> actionMontageArray = combatComp->GetMainWeapon()->GetActionMontages(characterAction);
 	if (actionMontageArray.Num() > 0) return returnPerformAction;
 	
 	int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
@@ -440,7 +440,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	
 	if (!combatComp->GetMainWeapon()) return returnPerformAttack;
 	
-	TArray<UAnimMontage*> attackMontageArray = combatComp->GetMainWeapon()->GetActioMontages(attackType);
+	TArray<UAnimMontage*> attackMontageArray = combatComp->GetMainWeapon()->GetActionMontages(attackType);
 	if (attackMontageArray.Num() > 0) return returnPerformAttack;
 	
 	int32 randomIndex = FMath::RandRange(0, attackMontageArray.Num() - 1);
@@ -448,7 +448,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	TObjectPtr<UAnimMontage> attackMontage = attackMontageArray.IsValidIndex(index) ? attackMontageArray[index] : nullptr;
 	if (!attackMontage) return returnPerformAttack;
 
-	stateManagerComp->SetCurrentState(attackingStateTag);
+	stateManagerComp->SetCurrentState(GameplayTags::State::Attacking());
 	stateManagerComp->SetCurrentAction(attackType);
 
 	FHitResult hitResult;

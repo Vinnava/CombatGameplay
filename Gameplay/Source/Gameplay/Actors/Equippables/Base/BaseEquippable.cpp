@@ -6,7 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Character.h"
 
-DEFINE_LOG_CATEGORY(LogBaseEquippable);
+DEFINE_LOG_CATEGORY(GPLogBaseEquippable);
 
 // Sets default values
 ABaseEquippable::ABaseEquippable()
@@ -26,16 +26,17 @@ ABaseEquippable::ABaseEquippable()
 
 bool ABaseEquippable::AttachActorToSocket(FName socketName)
 {
-	TObjectPtr<ACharacter> attachActor = Cast<ACharacter>(GetOwner());
-	if (attachActor)
+	if (TObjectPtr<ACharacter> attachActor = Cast<ACharacter>(GetOwner()))
 	{
-		TObjectPtr<USkeletalMeshComponent> characterMesh = attachActor->GetMesh();
-		if (characterMesh)
+		if (TObjectPtr<USkeletalMeshComponent> characterMesh = attachActor->GetMesh())
 		{
 			bool bIsAttached = itemMesh->AttachToComponent(characterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, socketName);
+			UE_LOG(GPLogBaseEquippable, Log, TEXT("[%s] Attached to Socket: %s"), *GetName(), *socketName.ToString());
 			return bIsAttached;
 		}
+		else UE_LOG(GPLogBaseEquippable, Warning, TEXT("[%s] [AttachActorToSocket] characterMesh is Null"), *GetName());
 	}
+	UE_LOG(GPLogBaseEquippable, Warning, TEXT("[%s] [AttachActorToSocket] AttachActor is Null"), *GetName());
 	return false;
 }
 
@@ -43,7 +44,7 @@ void ABaseEquippable::OnEquipped()
 {
 	bIsEquipped = AttachActorToSocket(attachSocketName);
 	
-	UE_LOG(LogBaseEquippable, Log, TEXT("%s Equipped State: %s"), *itemMesh->GetName(), bIsEquipped ? TEXT("True") : TEXT("False"));
+	UE_LOG(GPLogBaseEquippable, Log, TEXT("[%s] Equipped State: %s"), *GetName(), bIsEquipped ? TEXT("True") : TEXT("False"));
 }
 
 void ABaseEquippable::OnUnequipped()

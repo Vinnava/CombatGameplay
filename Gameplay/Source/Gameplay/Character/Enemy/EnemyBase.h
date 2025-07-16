@@ -21,7 +21,7 @@ protected://Variables
 	TObjectPtr<class UWidgetComponent> healthWidget;
 
 public://Variables
-	UPROPERTY(EditDefaultsOnly, Category = Dummy)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Dummy)
 	bool bIsDummy;
 	
 	UPROPERTY(EditDefaultsOnly, Category = AI)
@@ -39,7 +39,9 @@ protected://Functions
 public://Functions
 	AEnemyBase();
 
+	UFUNCTION(BlueprintCallable, Category = AI)
 	void SetHealthBarWidgetVisibility(bool visible);
+	
 	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta) override;
 	
 	virtual FPerformDeath PerformDeath() override;

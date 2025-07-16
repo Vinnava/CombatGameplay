@@ -7,7 +7,7 @@
 #include "Gameplay/Character/Base/CharacterBase.h"
 #include "Gameplay/Character/Enemy/EnemyBase.h"
 #include "Gameplay/Components/CombatComponent.h"
-#include "Gameplay/Data/GameplayTagData.h"
+#include "Gameplay/Data/GameplayTagLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Sight.h"
@@ -53,7 +53,7 @@ void AAICEnemy::OnPerceptionUpdated(const TArray<AActor*>& sensedActors)
 			const FAISenseID damageID = UAISense::GetSenseID<UAISense_Damage>();
 
 			FGameplayTagContainer tagsToCheck;
-			tagsToCheck.AddTag(playerTag);
+			tagsToCheck.AddTag(GameplayTags::Player());
 			
 			if (senseID == sightID) // Handle Sight
 			{

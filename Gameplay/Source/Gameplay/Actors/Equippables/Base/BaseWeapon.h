@@ -6,6 +6,8 @@
 #include "BaseEquippable.h"
 #include "BaseWeapon.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(GPLogBaseWeapon, Log, All);
+
 /**
  * 
  */
@@ -57,8 +59,8 @@ protected://Functions
 	
 public://Functions
 	ABaseWeapon();
-	
-	void OnEquipped() override;
+
+	virtual void OnEquipped() override;
 	void OnHit(FHitResult hitResult);
 	void SimulateWeaponPhysics();
 	
@@ -68,7 +70,7 @@ public://Functions
 	void ToggleCombat();
 	
 	float GetDamage() const { return damage; }
-	const TArray<TObjectPtr<UAnimMontage>>& GetActioMontages(FGameplayTag characterAction) const;
+	const TArray<UAnimMontage*>& GetActionMontages(FGameplayTag characterAction) const;
 
 private://Functions
 

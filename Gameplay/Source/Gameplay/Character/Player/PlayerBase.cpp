@@ -16,7 +16,7 @@
 #include "Gameplay/Data/GameplayData.h"
 #include "Gameplay/UI/Player/HealthBarWidget.h"
 #include "Gameplay/UI/Player/PlayerWidget.h"
-#include "Gameplay/Data/GameplayTagData.h"
+#include "Gameplay/Data/GameplayTagLibrary.h"
 
 
 APlayerBase::APlayerBase()
@@ -124,7 +124,7 @@ void APlayerBase::Look(const FInputActionValue& Value)
 
 void APlayerBase::LightAttack(const FInputActionValue& value)
 {
-	if (stateManagerComp->GetCurrentState() != attackingStateTag)
+	if (stateManagerComp->GetCurrentState() != GameplayTags::State::Attacking())
 	{
 		Attack();
 		return;
@@ -144,7 +144,7 @@ void APlayerBase::Dodge(const FInputActionValue& value)
 	if (!CanPerformDodge()) return;
 
 	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(dodgeWarpTargetName, GetActorLocation(), GetDesiredRotation());
-	PerformAction(dodgingStateTag, dodgeActionTag, 0, false);
+	PerformAction(GameplayTags::State::Dodging(), GameplayTags::Action::Dodge(), 0, false);
 }
 
 void APlayerBase::ToggleWalk(const FInputActionValue& value)

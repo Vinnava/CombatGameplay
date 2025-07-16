@@ -6,20 +6,20 @@
 #include "Gameplay/Actors/Equippables/Base/BaseEquippable.h"
 #include "Gameplay/Character/Base//CharacterBase.h"
 
-DEFINE_LOG_CATEGORY(LogEquipementComponent)
+DEFINE_LOG_CATEGORY(GPLogEquipementComponent)
 
 void UEquipmentComponent::InitializeEquipment()
 {
 	TObjectPtr<ACharacterBase> character = Cast<ACharacterBase>(GetOwner());
 	if (!character)
 	{
-		UE_LOG(LogEquipementComponent, Warning, TEXT("Failed to cast owner to ACharacterBase"));
+		UE_LOG(GPLogEquipementComponent, Warning, TEXT("[%s] [InitializeEquipment] Failed to cast owner to ACharacterBase"), *GetName());
 		return;
 	}
 
 	if (startingEquipments.IsEmpty())
 	{
-		UE_LOG(LogEquipementComponent, Log, TEXT("No starting equipment to spawn"));
+		UE_LOG(GPLogEquipementComponent, Warning, TEXT("[%s] [InitializeEquipment] No starting equipment to spawn"), *GetName());
 		return;
 	}
 
@@ -34,7 +34,7 @@ void UEquipmentComponent::InitializeEquipment()
 	{
 		if (!startingEquipment)
 		{
-			UE_LOG(LogEquipementComponent, Warning, TEXT("Null equipment class found in startingEquipments, skipping"));
+			UE_LOG(GPLogEquipementComponent, Warning, TEXT("[%s] [InitializeEquipment] Null equipment class found in startingEquipments, skipping"), *GetName());
 			continue;
 		}
 		
@@ -44,17 +44,16 @@ void UEquipmentComponent::InitializeEquipment()
 		// Validate spawn was successful
 		if (!spawnedActor)
 		{
-			UE_LOG(LogEquipementComponent, Error, TEXT("Failed to spawn equipment: %s"), *startingEquipment->GetName());
+			UE_LOG(GPLogEquipementComponent, Error, TEXT("[%s] [InitializeEquipment] Failed to spawn equipment: %s"), *GetName(), *startingEquipment->GetName());
 			continue;
 		}
 
 		// Add to equipment list
 		currentEquipments.AddUnique(spawnedActor);
 		
-		// spawnedActor->OnEquipped();
-		// spawnedActor->ToggleCombat();
+		spawnedActor->OnEquipped();
     
-		UE_LOG(LogEquipementComponent, Log, TEXT("Successfully spawned equipment: %s"), *spawnedActor->GetName());
+		UE_LOG(GPLogEquipementComponent, Log, TEXT("[%s] Successfully spawned equipment: %s"), *GetName(), *spawnedActor->GetName());
 	}
 }
 
