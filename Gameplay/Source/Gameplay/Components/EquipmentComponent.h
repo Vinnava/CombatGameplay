@@ -6,8 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "EquipmentComponent.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(GPLogEquipementComponent, Log, All);
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAMEPLAY_API UEquipmentComponent : public UActorComponent

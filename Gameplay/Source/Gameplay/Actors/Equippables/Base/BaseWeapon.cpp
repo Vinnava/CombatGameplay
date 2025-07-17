@@ -8,7 +8,7 @@
 #include "Gameplay/Data/GameplayTagLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
-DEFINE_LOG_CATEGORY(GPLogBaseWeapon)
+DEFINE_LOG_CATEGORY_STATIC(GPLogBaseWeapon, Log, All)
 
 ABaseWeapon::ABaseWeapon()
 {

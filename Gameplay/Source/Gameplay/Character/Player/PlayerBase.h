@@ -90,7 +90,7 @@ protected://Functions
 	void LightAttack(const FInputActionValue& value);
 	void Dodge(const FInputActionValue& value);
 	void ToggleWalk(const FInputActionValue& value);
-	void ToggleToturial(const FInputActionValue& value);
+	void ToggleTutorial(const FInputActionValue& value);
 	void ToggleMenu(const FInputActionValue& value);
 #pragma endregion InputComponents
 

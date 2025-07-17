@@ -18,6 +18,7 @@
 #include "Gameplay/UI/Player/PlayerWidget.h"
 #include "Gameplay/Data/GameplayTagLibrary.h"
 
+DEFINE_LOG_CATEGORY_STATIC(GPLogPlayerBase, Log, All);
 
 APlayerBase::APlayerBase()
 {
@@ -43,7 +44,13 @@ APlayerBase::APlayerBase()
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Ensure combat and state manager components are initialized
+	if (!combatComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] CombatComponent is missing!"), *GetName());
+
+	if (!stateManagerComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] StateManagerComponent is missing!"), *GetName());
 	
+	if (!playerWidgetRef || !playerWidgetRef->healthWidget) UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [BeginPlay] PlayerWidget or HealthBarWidget is not assigned!"), *GetName());
 }
 
 void APlayerBase::Tick(float DeltaTime)
@@ -56,34 +63,33 @@ void APlayerBase::Tick(float DeltaTime)
 
 void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// Add Input Mapping Context
+	// Setup Enhanced Input Mapping
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
 		{
-			Subsystem->AddMappingContext(defaultMappingContext, 0);
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
+			{
+				Subsystem->AddMappingContext(defaultMappingContext, 0);
+				UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Default input mapping context added."), *GetName());
+			}
+			else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetupPlayerInputComponent] Failed to get EnhancedInputLocalPlayerSubsystem."), *GetName());
 		}
 	}
-	
-	// Set up action bindings
+
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// Moving
+		// Bind input actions
 		EnhancedInputComponent->BindAction(moveAction, ETriggerEvent::Triggered, this, &APlayerBase::Move);
-
-		// Looking
 		EnhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerBase::Look);
-
-		// LightAttack
 		EnhancedInputComponent->BindAction(lightAttack, ETriggerEvent::Started, this, &APlayerBase::LightAttack);
-
-		// Dodge
-		EnhancedInputComponent->BindAction(dodge, ETriggerEvent::Started, this, &APlayerBase::Dodge);
+		EnhancedInputComponent->BindAction(toggleWalk, ETriggerEvent::Started, this, &APlayerBase::ToggleWalk);
+		EnhancedInputComponent->BindAction(toggleTutorial, ETriggerEvent::Started, this, &APlayerBase::ToggleTutorial);
+		EnhancedInputComponent->BindAction(toggleMenu, ETriggerEvent::Started, this, &APlayerBase::ToggleMenu);
+		
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Input actions bound successfully."), *GetName());
 	}
-	else
-	{
-		UE_LOG(LogBaseCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetupPlayerInputComponent] Failed to cast PlayerInputComponent to UEnhancedInputComponent."), *GetName());
 }
 
 void APlayerBase::Move(const FInputActionValue& Value)
@@ -107,6 +113,7 @@ void APlayerBase::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, movementValue.Y);
 		AddMovementInput(RightDirection, movementValue.X);
 	}
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [Move] Cannot Move, Controller reference is Null."), *GetName());
 }
 
 void APlayerBase::Look(const FInputActionValue& Value)
@@ -120,20 +127,33 @@ void APlayerBase::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [Look] Cannot Look, Controller reference is Null."), *GetName());
 }
 
 void APlayerBase::LightAttack(const FInputActionValue& value)
 {
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] LightAttack triggered."), *GetName());
+
+	if (!combatComp || !stateManagerComp)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [LightAttack] Cannot perform LightAttack: combatComp or stateManagerComp is null"), *GetName());
+		return;
+	}
+
 	if (stateManagerComp->GetCurrentState() != GameplayTags::State::Attacking())
 	{
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack."), *GetName());
 		Attack();
 		return;
 	}
+
 	if (!combatComp->bCanContinueAttack)
 	{
 		combatComp->bIsAttackSaved = true;
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Attack saved to be continued."), *GetName());
 		return;
 	}
+
 	combatComp->bIsAttackSaved = false;
 	stateManagerComp->ResetState();
 	Attack();
@@ -141,7 +161,11 @@ void APlayerBase::LightAttack(const FInputActionValue& value)
 
 void APlayerBase::Dodge(const FInputActionValue& value)
 {
-	if (!CanPerformDodge()) return;
+	if (!CanPerformDodge())
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] Cannot Perform Dodge."), *GetName());
+		return;
+	}
 
 	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(dodgeWarpTargetName, GetActorLocation(), GetDesiredRotation());
 	PerformAction(GameplayTags::State::Dodging(), GameplayTags::Action::Dodge(), 0, false);
@@ -152,25 +176,37 @@ void APlayerBase::ToggleWalk(const FInputActionValue& value)
 	if (GetMovementSpeedMode() == EMovementSpeedMode::Walking)
 	{
 		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] EMovementSpeedMode::Jogging."), *GetName());
 	}
 	else if (GetMovementSpeedMode() == EMovementSpeedMode::Jogging)
 	{
 		SetMovementSpeedMode(EMovementSpeedMode::Walking);
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] EMovementSpeedMode::Walking."), *GetName());
 	}
 }
 
-void APlayerBase::ToggleToturial(const FInputActionValue& value)
+void APlayerBase::ToggleTutorial(const FInputActionValue& value)
 {
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] ToggleTutorial."), *GetName());
 	playerWidgetRef->ToggleTutorial();
 }
 
 void APlayerBase::ToggleMenu(const FInputActionValue& value)
 {
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	if (!playerController || !playerWidgetRef)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetName());
+		return;
+	}
+
+	// Rest of the function remains, but add logs like:
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Menu %s."), *GetName(), bIsMenuUp ? TEXT("closed") : TEXT("opened"));
+
 	if (bIsMenuUp == true)
 	{
 		bIsMenuUp = false;
 		
-		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 		FInputModeGameOnly inputMode;
 		playerController->SetInputMode(inputMode);
 		
@@ -182,12 +218,12 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 			subsystem->RemoveMappingContext(menuMappingContext);
 			subsystem->AddMappingContext(defaultMappingContext, 0);
 		}
+		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetName());
 	}
 	else
 	{
 		bIsMenuUp = true;
-
-		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+		
 		FInputModeGameAndUI inputMode;
 		inputMode.SetWidgetToFocus(playerWidgetRef->TakeWidget());
 		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -202,6 +238,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 			subsystem->RemoveMappingContext(defaultMappingContext);
 			subsystem->AddMappingContext(menuMappingContext, 0);
 		}
+		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetName());
 	}
 }
 
@@ -209,6 +246,13 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 
 void APlayerBase::BobbleCamera()
 {
+	// Smoothly interpolates camera boom location to reduce sharp head motion
+	if (!cameraBoom || !cameraBobbler)
+	{
+		UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BobbleCamera] Failed: cameraBoom or cameraBobbler is null."), *GetName());
+		return;
+	}
+	
 	FVector start = cameraBoom->GetComponentLocation();
 	FVector end = cameraBobbler->GetComponentLocation();
 	FVector halfway = FMath::Lerp(start, end, 0.05f);
@@ -220,8 +264,13 @@ void APlayerBase::EnableRagdoll() const
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	cameraBoom->AttachToComponent(GetMesh(),  FAttachmentTransformRules::KeepWorldTransform, pelvisBoneName);
-	cameraBoom->bDoCollisionTest = false;
+	if (cameraBoom)
+	{
+		cameraBoom->AttachToComponent(GetMesh(),  FAttachmentTransformRules::KeepWorldTransform, pelvisBoneName);
+		cameraBoom->bDoCollisionTest = false;
+	}
+	else UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [EnableRagdoll] Failed: CameraBoom is null."), *GetName());
+	
 	GetMesh()->SetCollisionProfileName(TEXT("ragdoll"), true);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
 	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, true, true);
@@ -230,6 +279,13 @@ void APlayerBase::EnableRagdoll() const
 FPerformDeath APlayerBase::PerformDeath()
 {
 	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	
+	if (!playerController || !playerWidgetRef)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetName());
+		return {};
+	}
+	
 	FInputModeUIOnly inputModeData;
 	inputModeData.SetWidgetToFocus(playerWidgetRef->TakeWidget());
 	inputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -243,5 +299,11 @@ FPerformDeath APlayerBase::PerformDeath()
 
 void APlayerBase::OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta)
 {
+	if (!playerWidgetRef || !playerWidgetRef->healthWidget)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [OnHealthChanged] Cannot update health UI: Widget or health widget is null."), *GetName());
+		return;
+	}
+	
 	playerWidgetRef->healthWidget->UpdateHealth(newHealth);
 }

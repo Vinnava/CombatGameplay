@@ -6,7 +6,7 @@
 #include "Gameplay/Actors/Equippables/Base/BaseEquippable.h"
 #include "Gameplay/Character/Base//CharacterBase.h"
 
-DEFINE_LOG_CATEGORY(GPLogEquipementComponent)
+DEFINE_LOG_CATEGORY_STATIC(GPLogEquipementComponent, Log, All)
 
 void UEquipmentComponent::InitializeEquipment()
 {

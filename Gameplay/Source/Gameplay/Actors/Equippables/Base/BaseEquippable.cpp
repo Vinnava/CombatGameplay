@@ -6,7 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Character.h"
 
-DEFINE_LOG_CATEGORY(GPLogBaseEquippable);
+DEFINE_LOG_CATEGORY_STATIC(GPLogBaseEquippable, Log, All);
 
 // Sets default values
 ABaseEquippable::ABaseEquippable()

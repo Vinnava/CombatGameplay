@@ -6,8 +6,6 @@
 #include "BaseEquippable.h"
 #include "BaseWeapon.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(GPLogBaseWeapon, Log, All);
-
 /**
  * 
  */

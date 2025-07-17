@@ -63,63 +63,12 @@ namespace GameplayTags
 		return Tag;
 	}
 }
+
+
+
 UCLASS()
 class GAMEPLAY_API UGameplayTagLibrary : public UObject
 {
 	GENERATED_BODY()
 
-	static const FGameplayTag& GetLightAttackActionTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Action.Attack.LightAttack"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetDodgeActionTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Action.Dodge"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetDieActionTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Action.Die"));
-		return Tag;
-	}
-    
-	// State Tags
-	static const FGameplayTag& GetDeadStateTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.State.Dead"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetAttackingStateTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.State.Attacking"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetDisabledStateTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.State.Disabled"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetDodgingStateTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.State.Dodging"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetGeneralActionStateTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.State.GeneralAction"));
-		return Tag;
-	}
-    
-	static const FGameplayTag& GetPlayerTag()
-	{
-		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Player"));
-		return Tag;
-	}
 };
