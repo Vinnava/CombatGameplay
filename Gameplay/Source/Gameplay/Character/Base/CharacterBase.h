@@ -10,9 +10,6 @@
 #include "CharacterBase.generated.h"
 
 
-
-DECLARE_LOG_CATEGORY_EXTERN(LogBaseCharacter, Log, All);
-
 UCLASS(config=Game)
 class ACharacterBase : public ACharacter, public IGameplayTagInterface, public ICombatInterface
 {
