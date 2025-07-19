@@ -142,21 +142,26 @@ void APlayerBase::LightAttack(const FInputActionValue& value)
 
 	if (stateManagerComp->GetCurrentState() != GameplayTags::State::Attacking())
 	{
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack."), *GetName());
+		// Start Combo Attack
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Start Combo Attack."), *GetName());
 		Attack();
 		return;
 	}
 
-	if (!combatComp->bCanContinueAttack)
+	if (combatComp->bCanContinueAttack)
 	{
+		// Continue Attack
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack."), *GetName());
+		combatComp->bIsAttackSaved = false;
+		stateManagerComp->ResetState();
+		Attack();
+	}
+	else
+	{
+		// Attack saved to be continued
 		combatComp->bIsAttackSaved = true;
 		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Attack saved to be continued."), *GetName());
-		return;
 	}
-
-	combatComp->bIsAttackSaved = false;
-	stateManagerComp->ResetState();
-	Attack();
 }
 
 void APlayerBase::Dodge(const FInputActionValue& value)
@@ -166,7 +171,7 @@ void APlayerBase::Dodge(const FInputActionValue& value)
 		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] Cannot Perform Dodge."), *GetName());
 		return;
 	}
-
+	//MotionWarp & Dodge
 	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(dodgeWarpTargetName, GetActorLocation(), GetDesiredRotation());
 	PerformAction(GameplayTags::State::Dodging(), GameplayTags::Action::Dodge(), 0, false);
 }
@@ -200,11 +205,11 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 		return;
 	}
 
-	// Rest of the function remains, but add logs like:
 	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Menu %s."), *GetName(), bIsMenuUp ? TEXT("closed") : TEXT("opened"));
 
 	if (bIsMenuUp == true)
 	{
+		// Remove Menu
 		bIsMenuUp = false;
 		
 		FInputModeGameOnly inputMode;
@@ -222,6 +227,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 	}
 	else
 	{
+		// Add Menu
 		bIsMenuUp = true;
 		
 		FInputModeGameAndUI inputMode;
@@ -264,6 +270,7 @@ void APlayerBase::EnableRagdoll() const
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	
 	if (cameraBoom)
 	{
 		cameraBoom->AttachToComponent(GetMesh(),  FAttachmentTransformRules::KeepWorldTransform, pelvisBoneName);

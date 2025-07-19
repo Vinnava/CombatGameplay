@@ -4,6 +4,7 @@
 #include "StateManagerComponent.h"
 #include "GameplayTagContainer.h"
 
+DEFINE_LOG_CATEGORY_STATIC(GPLogStateManagerComp, Log, All);
 
 void UStateManagerComponent::SetCurrentState(FGameplayTag newState)
 {
@@ -13,6 +14,7 @@ void UStateManagerComponent::SetCurrentState(FGameplayTag newState)
 		currentState = newState;
 		OnCharacterStateBegin.Broadcast(currentState);
 	}
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetName(), *currentState.ToString());
 }
 
 FGameplayTag UStateManagerComponent::GetCurrentState()
@@ -38,6 +40,7 @@ void UStateManagerComponent::SetCurrentAction(FGameplayTag newAction)
 		currentAction = newAction;
 		OnCharacterActionBegin.Broadcast(currentAction);
 	}
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetName(), *currentAction.ToString());
 }
 
 FGameplayTag UStateManagerComponent::GetCurrentAction()

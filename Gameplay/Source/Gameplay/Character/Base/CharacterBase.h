@@ -60,7 +60,7 @@ private://Functions
 #pragma endregion ComponentDelegates
 
 protected://Functions
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
 
 	virtual float TakeDamage(float damage, FDamageEvent const& damageEvent, 
 							AController* eventInstigator, AActor* damageCauser) override;

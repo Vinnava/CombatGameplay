@@ -96,16 +96,15 @@ bool ACharacterBase::CanPerformAttack() const
 	statesToCheck.AddTag(GameplayTags::State::Disabled());
 	statesToCheck.AddTag(GameplayTags::State::GeneralAction());
 	statesToCheck.AddTag(GameplayTags::State::Attacking());
-	bool bCanAttack = !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && combatComp->bIsCombatEnabled;
 	
-	return bCanAttack;
+	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && combatComp->bIsCombatEnabled;
 }
 
 void ACharacterBase::Attack()
 {
 	if (!CanPerformAttack())
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [Attack] Cannot perform attack - conditions not met"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [Attack] Cannot perform attack - CanPerformAttack returns False"), *GetName());
 		return;
 	}
 
@@ -115,7 +114,7 @@ void ACharacterBase::Attack()
 		return;
 	}
 
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing light attack (Count: %d)"), *GetName(), combatComp->attackCount);
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing light attack"), *GetName());
 	PerformAttack(GameplayTags::Action::LightAttack(), combatComp->attackCount, false, false, 1.0f);
 }
 
@@ -877,10 +876,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		combatComp->attackCount = 0;
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack count reset to 0 after reaching max"), *GetName());
 	}
-
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack performed successfully (Count: %d/%d)"), 
-		   *GetName(), combatComp->attackCount, lastMontageIndex + 1);
-
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack performed successfully (Count: %d/%d)"), *GetName(), attackIndex, lastMontageIndex);
 	return returnPerformAttack;
 }
 #pragma endregion ICombatInterface
