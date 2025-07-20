@@ -237,7 +237,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 		playerController->SetInputMode(inputMode);
 
 		playerController->SetShowMouseCursor(true);
-		playerWidgetRef->RestatWidget();
+		playerWidgetRef->RestartWidget();
 
 		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
 		{
@@ -250,7 +250,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 
 #pragma endregion InputComponents
 
-void APlayerBase::BobbleCamera()
+void APlayerBase::BobbleCamera() const
 {
 	// Smoothly interpolates camera boom location to reduce sharp head motion
 	if (!cameraBoom || !cameraBobbler)
@@ -299,7 +299,7 @@ FPerformDeath APlayerBase::PerformDeath()
 	playerController->SetInputMode(inputModeData);
 	
 	playerController->SetShowMouseCursor(true);
-	playerWidgetRef->RestatWidget();
+	playerWidgetRef->RestartWidget();
 	
 	return Super::PerformDeath();
 }

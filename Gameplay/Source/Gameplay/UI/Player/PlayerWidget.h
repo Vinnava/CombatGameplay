@@ -18,7 +18,10 @@ private://Variables
 
 	
 protected://Variables
-
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> textCurrentState;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> textCurrentAction;
 
 public://Variables
 	UPROPERTY(meta=(BindWidget))
@@ -32,9 +35,12 @@ protected://Functions
 	
 public://Functions
 	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
-	void RestatWidget();
+	void RestartWidget();
 	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
 	void ToggleTutorial();
 	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
 	void RemoveRestartWidget();
+
+	void UpdateCurrentStateText(struct  FGameplayTag newState) const;
+	void UpdateCurrentActionText(FGameplayTag newAction) const;
 };

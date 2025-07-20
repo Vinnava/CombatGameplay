@@ -74,7 +74,7 @@ public://Variables
 	TObjectPtr<class UPlayerWidget> playerWidgetRef;
 
 private://Functions
-	void BobbleCamera();
+	void BobbleCamera() const;
 
 protected://Functions
 #pragma region InputComponents

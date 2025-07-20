@@ -3,6 +3,8 @@
 
 #include "StateManagerComponent.h"
 #include "GameplayTagContainer.h"
+#include "Gameplay/Character/Player/PlayerBase.h"
+#include "Gameplay/UI/Player/PlayerWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(GPLogStateManagerComp, Log, All);
 
@@ -13,6 +15,11 @@ void UStateManagerComponent::SetCurrentState(FGameplayTag newState)
 		OnCharacterStateEnd.Broadcast(currentState);
 		currentState = newState;
 		OnCharacterStateBegin.Broadcast(currentState);
+
+		if (const APlayerBase* playerRef = Cast<APlayerBase>(GetOwner()))
+		{
+			playerRef->playerWidgetRef->UpdateCurrentStateText(currentState);
+		}
 	}
 	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetName(), *currentState.ToString());
 }
@@ -39,6 +46,11 @@ void UStateManagerComponent::SetCurrentAction(FGameplayTag newAction)
 		OnCharacterActionEnd.Broadcast(currentAction);
 		currentAction = newAction;
 		OnCharacterActionBegin.Broadcast(currentAction);
+
+		if (const APlayerBase* playerRef = Cast<APlayerBase>(GetOwner()))
+		{
+			playerRef->playerWidgetRef->UpdateCurrentActionText(currentAction);
+		}
 	}
 	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetName(), *currentAction.ToString());
 }
