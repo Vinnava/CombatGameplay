@@ -32,6 +32,7 @@ FGameplayTag UStateManagerComponent::GetCurrentState()
 void UStateManagerComponent::ResetState()
 {
 	SetCurrentState(FGameplayTag::EmptyTag);
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] ResetState"), *GetName());
 }
 
 bool UStateManagerComponent::IsCurrentStateEqualToAny(FGameplayTagContainer statesToCheck)
@@ -63,6 +64,7 @@ FGameplayTag UStateManagerComponent::GetCurrentAction()
 void UStateManagerComponent::ResetAction()
 {
 	SetCurrentAction(FGameplayTag::EmptyTag);
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] ResetAction"), *GetName());
 }
 
 bool UStateManagerComponent::IsCurrentActionEqualToAny()

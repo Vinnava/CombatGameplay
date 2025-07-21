@@ -97,7 +97,7 @@ bool ACharacterBase::CanPerformAttack() const
 	statesToCheck.AddTag(GameplayTags::State::GeneralAction());
 	statesToCheck.AddTag(GameplayTags::State::Attacking());
 	
-	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && combatComp->bIsCombatEnabled;
+	return !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && combatComp->IsCombatEnabled();
 }
 
 void ACharacterBase::Attack()
@@ -134,7 +134,7 @@ bool ACharacterBase::CanPerformDodge() const
 	statesToCheck.AddTag(GameplayTags::State::GeneralAction());
 	
 	bool bCanDodge = !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck) && 
-					 combatComp->bIsCombatEnabled && 
+					 combatComp->IsCombatEnabled() && 
 					 !GetCharacterMovement()->IsFalling();
 	
 	return bCanDodge;
@@ -447,20 +447,17 @@ void ACharacterBase::ContinueAttack()
 
 	if (combatComp->bIsAttackSaved)
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack was saved, continuing combo"), *GetName());
+		combatComp->bIsAttackSaved = false;
 		
-		combatComp->bCanContinueAttack = false;
-		
-		if (stateManagerComp->GetCurrentState() != GameplayTags::State::Attacking())
-		{
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Not in attacking state, starting new attack"), *GetName());
-			Attack();
-			return;
-		}
-		else
+		if (stateManagerComp->GetCurrentState() == GameplayTags::State::Attacking())
 		{
 			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] In attacking state, resetting and continuing"), *GetName());
 			stateManagerComp->ResetState();
+			Attack();
+		}
+		else
+		{
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Not in attacking state, starting new attack"), *GetName());
 			Attack();
 		}
 	}
@@ -826,7 +823,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		40.0f, objectTypes, false, {}, EDrawDebugTrace::None, hitResult, true);
 
 	// Calculate positioning transform
-	FTransform targetTransform;
+	//FTransform targetTransform;
 	FVector targetLocation = GetActorLocation(); // Default to current location
 	FRotator targetRotation = GetActorRotation(); // Default to current rotation
 
@@ -838,14 +835,16 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		
 		targetLocation = directionToTarget * 200.0f + hitActor->GetActorLocation();
 		targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
+
+		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
 		
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack positioning: %s"), *GetName(), *hitActor->GetName());
 	}
 	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetName());
 
 
-	targetTransform.SetLocation(targetLocation);
-	targetTransform.SetRotation(targetRotation.Quaternion());
+	//targetTransform.SetLocation(targetLocation);
+	//targetTransform.SetRotation(targetRotation.Quaternion());
 
 	// Play attack animation
 	USkeletalMeshComponent* MeshComp = GetMesh();

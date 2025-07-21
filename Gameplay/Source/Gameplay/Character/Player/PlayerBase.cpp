@@ -151,8 +151,8 @@ void APlayerBase::LightAttack(const FInputActionValue& value)
 	if (combatComp->bCanContinueAttack)
 	{
 		// Continue Attack
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack."), *GetName());
-		combatComp->bIsAttackSaved = false;
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack & ResetAttack"), *GetName());
+		combatComp->bCanContinueAttack = false;
 		stateManagerComp->ResetState();
 		Attack();
 	}
@@ -252,13 +252,13 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 
 void APlayerBase::BobbleCamera() const
 {
-	// Smoothly interpolates camera boom location to reduce sharp head motion
 	if (!cameraBoom || !cameraBobbler)
 	{
 		UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BobbleCamera] Failed: cameraBoom or cameraBobbler is null."), *GetName());
 		return;
 	}
-	
+
+	// Smoothly interpolates camera boom location to reduce sharp head motion
 	FVector start = cameraBoom->GetComponentLocation();
 	FVector end = cameraBobbler->GetComponentLocation();
 	FVector halfway = FMath::Lerp(start, end, 0.05f);

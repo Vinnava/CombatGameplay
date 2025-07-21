@@ -40,10 +40,16 @@ protected://Variables
 
 	UPROPERTY(EditDefaultsOnly, Category = Initialize)
 	FName pelvisBoneName;
-	
-	float maxWalkSpeed;
-	float maxJogSpeed;
-	float maxSprintSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Initialize|MotionWarping")
+	FName attackWarpTargetName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Initialize|MovementSpeed", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float maxWalkSpeed {200.0f};
+	UPROPERTY(EditDefaultsOnly, Category = "Initialize|MovementSpeed", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float maxJogSpeed {500.0f};
+	UPROPERTY(EditDefaultsOnly, Category = "Initialize|MovementSpeed", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float maxSprintSpeed {750.0f};
 
 public://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")

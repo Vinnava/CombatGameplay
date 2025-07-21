@@ -15,12 +15,12 @@ class GAMEPLAY_API UCombatComponent : public UActorComponent
 	
 private://Variables
 	TObjectPtr<class ABaseWeapon> mainWeapon;
+	bool bIsCombatEnabled;
 
 public://Variables
 	int32 attackCount;
 	FOnToggleCombat onToggleCombat;
 	bool bIsAttackSaved;
-	bool bIsCombatEnabled;
 	bool bCanContinueAttack;
 
 public://Functions
