@@ -820,31 +820,34 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	
 	bool bHitTarget = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(), GetActorLocation(),
-		40.0f, objectTypes, false, {}, EDrawDebugTrace::None, hitResult, true);
+		400.0f, objectTypes, false, {this}, EDrawDebugTrace::ForDuration, hitResult, true);
 
 	// Calculate positioning transform
-	//FTransform targetTransform;
+	/*FTransform targetTransform;*/
 	FVector targetLocation = GetActorLocation(); // Default to current location
 	FRotator targetRotation = GetActorRotation(); // Default to current rotation
 
 	if (bHitTarget && hitResult.GetActor())
 	{
-		AActor* hitActor = hitResult.GetActor();
-		FVector directionToTarget = UKismetMathLibrary::GetForwardVector(
-			UKismetMathLibrary::FindLookAtRotation(hitActor->GetActorLocation(), GetActorLocation()));
+		const AActor* hitActor = hitResult.GetActor();
+		const FVector forwardVectorToTarget = UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::FindLookAtRotation(hitActor->GetActorLocation(), GetActorLocation()));
 		
-		targetLocation = directionToTarget * 200.0f + hitActor->GetActorLocation();
+		targetLocation = hitActor->GetActorLocation() + (forwardVectorToTarget * 200.0f);
 		targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
 
 		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
 		
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack positioning: %s"), *GetName(), *hitActor->GetName());
 	}
-	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetName());
+	else
+	{
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetName());
+		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
+	}
 
 
-	//targetTransform.SetLocation(targetLocation);
-	//targetTransform.SetRotation(targetRotation.Quaternion());
+	/*targetTransform.SetLocation(targetLocation);
+	targetTransform.SetRotation(targetRotation.Quaternion());*/
 
 	// Play attack animation
 	USkeletalMeshComponent* MeshComp = GetMesh();
