@@ -21,13 +21,13 @@ protected://Variables
 	TObjectPtr<class UWidgetComponent> healthWidget;
 
 public://Variables
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Dummy)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Initialize|Dummy")
 	bool bIsDummy;
 	
-	UPROPERTY(EditDefaultsOnly, Category = AI)
+	UPROPERTY(EditDefaultsOnly, Category = "Initialize|AI")
 	TObjectPtr<class UBehaviorTree> BehaviorTreeRef;
 
-	UPROPERTY(EditDefaultsOnly, Category = AI)
+	UPROPERTY(EditDefaultsOnly, Category = "Initialize|AI")
 	TArray<TObjectPtr<class ATargetPoint>> patrolPoints;
 
 private://Functions

@@ -83,6 +83,7 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(moveAction, ETriggerEvent::Triggered, this, &APlayerBase::Move);
 		EnhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerBase::Look);
 		EnhancedInputComponent->BindAction(lightAttack, ETriggerEvent::Started, this, &APlayerBase::LightAttack);
+		EnhancedInputComponent->BindAction(dodge, ETriggerEvent::Started, this, &APlayerBase::Dodge);
 		EnhancedInputComponent->BindAction(toggleWalk, ETriggerEvent::Started, this, &APlayerBase::ToggleWalk);
 		EnhancedInputComponent->BindAction(toggleTutorial, ETriggerEvent::Started, this, &APlayerBase::ToggleTutorial);
 		EnhancedInputComponent->BindAction(toggleMenu, ETriggerEvent::Started, this, &APlayerBase::ToggleMenu);
@@ -168,12 +169,13 @@ void APlayerBase::Dodge(const FInputActionValue& value)
 {
 	if (!CanPerformDodge())
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] Cannot Perform Dodge."), *GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [CanPerformDodge] Cannot Perform Dodge, CanPerformDodge returns False"), *GetName());
 		return;
 	}
 	//MotionWarp & Dodge
 	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(dodgeWarpTargetName, GetActorLocation(), GetDesiredRotation());
 	PerformAction(GameplayTags::State::Dodging(), GameplayTags::Action::Dodge(), 0, false);
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Performing Dodge."), *GetName());
 }
 
 void APlayerBase::ToggleWalk(const FInputActionValue& value)

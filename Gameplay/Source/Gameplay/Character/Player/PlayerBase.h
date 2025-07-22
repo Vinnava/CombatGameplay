@@ -17,33 +17,33 @@ class GAMEPLAY_API APlayerBase : public ACharacterBase
 private://Variables
 #pragma region InputVariables
 	/** MappingContext */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* defaultMappingContext;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* menuMappingContext;
 
 	/** Move Input Action */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* moveAction;
 
 	/** Look Input Action */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* lookAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* lightAttack;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* dodge;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* toggleWalk;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* toggleTutorial;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|InputActions", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	UInputAction* toggleMenu;
 	
 #pragma endregion InputVariables
