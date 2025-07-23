@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "GameplayData.generated.h"
 
 
@@ -19,7 +18,17 @@ enum class EMovementSpeedMode
 {
 	Walking,
 	Jogging,
-	Sprinting,
+	Sprinting
+};
+
+enum class EAIBehaviour
+{
+	None,
+	Patrol,
+	Chase,
+	Attack,
+	Hit,
+	Dead
 };
 
 UCLASS()

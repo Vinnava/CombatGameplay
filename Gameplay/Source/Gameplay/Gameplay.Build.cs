@@ -6,7 +6,7 @@ public class Gameplay : ModuleRules
 {
 	public Gameplay(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PrivateDependencyModuleNames.AddRange(new string[] { "AIModule", "MotionWarping", "GameplayCameras", "GameplayCameras" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "AIModule", "MotionWarping", "GameplayCameras", "GameplayCameras", "BehaviorTreeEditor"});
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTags", "MotionTrajectory" });

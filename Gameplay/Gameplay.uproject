@@ -13,7 +13,8 @@
 				"AIModule",
 				"CoreUObject",
 				"GameplayCameras",
-				"UMG"
+				"UMG",
+				"BehaviorTreeEditor"
 			]
 		}
 	],
