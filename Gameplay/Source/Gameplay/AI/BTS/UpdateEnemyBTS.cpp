@@ -3,19 +3,32 @@
 
 #include "UpdateEnemyBTS.h"
 
+#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BTFunctionLibrary.h"
+#include "Gameplay/Character/Enemy/EnemyBase.h"
+#include "Gameplay/Components/StateManagerComponent.h"
 #include "Gameplay/Data/GameplayData.h"
+#include "Gameplay/Data/GameplayTagLibrary.h"
 
+
+DEFINE_LOG_CATEGORY_STATIC(GPLogUpdateEnemyBTS, Log, All);
+
+
+UUpdateEnemyBTS::UUpdateEnemyBTS()
+{
+	NodeName = TEXT("Update EnemyAI Behavior");
+	bNotifyBecomeRelevant = true;
+	bNotifyTick = true;
+}
 
 void UUpdateEnemyBTS::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	// Get blackboard
 	blackboardComp = OwnerComp.GetBlackboardComponent();
-}
-
-void UUpdateEnemyBTS::OnSearchStart(FBehaviorTreeSearchData& SearchData)
-{
-	
+	masterAIPawn = OwnerComp.GetAIOwner()->GetPawn();
+	masterAIController = Cast<AAIController>(masterAIPawn);
+	UpdateBehavior();
 }
 
 void UUpdateEnemyBTS::SetEnemyBehavior(EAIBehaviour newBehaviour)
@@ -25,5 +38,43 @@ void UUpdateEnemyBTS::SetEnemyBehavior(EAIBehaviour newBehaviour)
 
 void UUpdateEnemyBTS::UpdateBehavior()
 {
-	
+	if (!masterAIPawn && !masterAIController)
+	{
+		UE_LOG(GPLogUpdateEnemyBTS, Error, TEXT("[%s] [UpdateBehavior] Couldn't able to update behaviour : masterAI or masterAIController is null"), *GetName());
+		return;
+	}
+
+	AEnemyBase* enemyAIRef = Cast<AEnemyBase>(masterAIPawn);
+	if (!enemyAIRef)
+	{
+		UE_LOG(GPLogUpdateEnemyBTS, Warning, TEXT("[%s] [UpdateBehavior] AEnemyBase cast Failed"), *GetName());
+		return;
+	}
+
+	if (enemyAIRef->stateManagerComp->GetCurrentState() == GameplayTags::State::Dead())
+	{
+		SetEnemyBehavior(EAIBehaviour::None);
+	}
+	else
+	{
+		AActor* targetActor = UBTFunctionLibrary::GetBlackboardValueAsActor(this, target);
+		if (!targetActor)
+		{
+			bCanSeeTarget = false;
+			SetEnemyBehavior(EAIBehaviour::Patrol);
+			enemyAIRef->SetHealthBarWidgetVisibility(false);
+		}
+		else
+		{
+			enemyAIRef->SetHealthBarWidgetVisibility(true);
+			bCanSeeTarget = true;
+
+			float targetDistance = targetActor->GetDistanceTo(masterAIPawn);
+			if (targetDistance <= maxAttackRange)
+			{
+				SetEnemyBehavior(EAIBehaviour::Attack);
+			}
+			else SetEnemyBehavior(EAIBehaviour::Chase);
+		}
+	}
 }

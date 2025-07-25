@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/Services/BTService_BlackboardBase.h"
+#include "Base/BTServiceBaseGP.h"
 #include "UpdateEnemyBTS.generated.h"
 
 
@@ -11,13 +11,13 @@
  * 
  */
 UCLASS()
-class GAMEPLAY_API UUpdateEnemyBTS : public UBTService
+class GAMEPLAY_API UUpdateEnemyBTS : public UBTServiceBaseGP
 {
 	GENERATED_BODY()
 	
 private://Variables
 	TObjectPtr<UBlackboardComponent> blackboardComp;
-	TObjectPtr<APawn> masterAI;
+	TObjectPtr<APawn> masterAIPawn;
 	TObjectPtr<AAIController> masterAIController;
 	bool bCanSeeTarget{false};
 
@@ -29,10 +29,10 @@ protected://Variables
 	FBlackboardKeySelector target;
 
 	UPROPERTY(EditInstanceOnly)
-	FBlackboardKeySelector self;
+	FBlackboardKeySelector attackRangeKey;
 
 	UPROPERTY(EditInstanceOnly)
-	FBlackboardKeySelector maxAttackRange;
+	float maxAttackRange{0.0f};
 
 private://Functions
 	void SetEnemyBehavior(enum class EAIBehaviour newBehaviour);
@@ -40,13 +40,7 @@ private://Functions
 	
 protected://Functions
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-	virtual void OnSearchStart(FBehaviorTreeSearchData& SearchData) override;
 
 public://Functions
-	UUpdateEnemyBTS()
-	{
-		NodeName = TEXT("Update Enemy Behavior");
-		bNotifyBecomeRelevant = true;
-		bNotifyTick = true;
-	}
+	UUpdateEnemyBTS();
 };

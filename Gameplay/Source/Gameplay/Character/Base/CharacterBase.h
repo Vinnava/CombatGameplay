@@ -21,15 +21,6 @@ private://Variables
 	
 protected://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<class UStatsComponent> statsComp;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<class UStateManagerComponent> stateManagerComp ;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<class UEquipmentComponent> equipComp;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UMotionWarpingComponent> motionWarpingComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Initialize)
@@ -52,6 +43,15 @@ protected://Variables
 	float maxSprintSpeed {750.0f};
 
 public://Variables
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UStatsComponent> statsComp;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UEquipmentComponent> equipComp;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UStateManagerComponent> stateManagerComp;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UCombatComponent> combatComp;
 	
