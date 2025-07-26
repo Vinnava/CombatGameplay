@@ -22,16 +22,16 @@ private://Variables
 	bool bCanSeeTarget{false};
 
 protected://Variables
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category=Task)
 	FBlackboardKeySelector behaviourKey;
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category=Task)
 	FBlackboardKeySelector target;
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category=Task)
 	FBlackboardKeySelector attackRangeKey;
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category=Task)
 	float maxAttackRange{0.0f};
 
 private://Functions
@@ -42,5 +42,10 @@ protected://Functions
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 public://Functions
-	UUpdateEnemyBTS();
+	UUpdateEnemyBTS()
+	{
+		NodeName = TEXT("Update EnemyAI Behavior");
+		bNotifyBecomeRelevant = true;
+		bNotifyTick = true;
+	}
 };

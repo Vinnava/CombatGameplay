@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTService.h"
-#include "BTServiceBaseGP.generated.h"
+#include "BehaviorTree/BTTaskNode.h"
+#include "BTTaskNodeBaseGP.generated.h"
 
 /**
  * 
  */
-UCLASS(Abstract)
-class GAMEPLAY_API UBTServiceBaseGP : public UBTService
+UCLASS()
+class GAMEPLAY_API UBTTaskNodeBaseGP : public UBTTaskNode
 {
 	GENERATED_BODY()
 
@@ -25,8 +25,8 @@ protected://Variables
 
 protected://Function
 	// Gets the description for our service
-	virtual FString GetStaticServiceDescription() const override;
+	virtual FString GetStaticDescription() const override;
 
 public://Function
-	UBTServiceBaseGP();
+	UBTTaskNodeBaseGP();
 };

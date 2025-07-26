@@ -1,15 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BTServiceBaseGP.h"
+#include "BTTaskNodeBaseGP.h"
 
 #include "BlueprintNodeHelpers.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 
 
-UBTServiceBaseGP::UBTServiceBaseGP()
+UBTTaskNodeBaseGP::UBTTaskNodeBaseGP()
 {
-	const UClass* StopAtClass = UBTServiceBaseGP::StaticClass();
+	const UClass* StopAtClass = UBTTaskNodeBaseGP::StaticClass();
 	bShowPropertyDetails = true;
 
 	// all blueprint based nodes must create instances
@@ -21,21 +20,21 @@ UBTServiceBaseGP::UBTServiceBaseGP()
 	}
 }
 
-FString UBTServiceBaseGP::GetStaticServiceDescription() const
+FString UBTTaskNodeBaseGP::GetStaticDescription() const
 {
-	FString ReturnDesc;
-
-	UBTServiceBaseGP* CDO = (UBTServiceBaseGP*)(GetClass()->GetDefaultObject());
-	if (CDO && bShowPropertyDetails)
+	FString ReturnDesc = Super::GetStaticDescription();
+	UBTTaskNodeBaseGP* CDO = static_cast<UBTTaskNodeBaseGP*>(GetClass()->GetDefaultObject());
+	if (bShowPropertyDetails && CDO)
 	{
-		UClass* StopAtClass = UBTServiceBaseGP::StaticClass();
+		const UClass* StopAtClass = UBTTaskNodeBaseGP::StaticClass();
 		FString PropertyDesc = BlueprintNodeHelpers::CollectPropertyDescription(this, StopAtClass, CDO->PropertyData);
 		if (PropertyDesc.Len())
 		{
-			ReturnDesc += TEXT("\n\n");
+			ReturnDesc += TEXT(":\n\n");
 			ReturnDesc += PropertyDesc;
 		}
 	}
 	return ReturnDesc;
 }
+
 

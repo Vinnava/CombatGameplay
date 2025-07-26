@@ -14,25 +14,18 @@
 
 DEFINE_LOG_CATEGORY_STATIC(GPLogUpdateEnemyBTS, Log, All);
 
-
-UUpdateEnemyBTS::UUpdateEnemyBTS()
-{
-	NodeName = TEXT("Update EnemyAI Behavior");
-	bNotifyBecomeRelevant = true;
-	bNotifyTick = true;
-}
-
 void UUpdateEnemyBTS::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	// Get blackboard
 	blackboardComp = OwnerComp.GetBlackboardComponent();
-	masterAIPawn = OwnerComp.GetAIOwner()->GetPawn();
-	masterAIController = Cast<AAIController>(masterAIPawn);
+	masterAIController = OwnerComp.GetAIOwner();
+	masterAIPawn = masterAIController ? masterAIController->GetPawn() : nullptr;
 	UpdateBehavior();
 }
 
 void UUpdateEnemyBTS::SetEnemyBehavior(EAIBehaviour newBehaviour)
 {
+	//Updating behaviourKey Value
 	blackboardComp->SetValueAsEnum(behaviourKey.SelectedKeyName, static_cast<uint8>(newBehaviour));
 }
 
@@ -53,6 +46,7 @@ void UUpdateEnemyBTS::UpdateBehavior()
 
 	if (enemyAIRef->stateManagerComp->GetCurrentState() == GameplayTags::State::Dead())
 	{
+		//Dead
 		SetEnemyBehavior(EAIBehaviour::None);
 	}
 	else
@@ -60,6 +54,7 @@ void UUpdateEnemyBTS::UpdateBehavior()
 		AActor* targetActor = UBTFunctionLibrary::GetBlackboardValueAsActor(this, target);
 		if (!targetActor)
 		{
+			//Player Wasn't Deducted
 			bCanSeeTarget = false;
 			SetEnemyBehavior(EAIBehaviour::Patrol);
 			enemyAIRef->SetHealthBarWidgetVisibility(false);
@@ -72,8 +67,10 @@ void UUpdateEnemyBTS::UpdateBehavior()
 			float targetDistance = targetActor->GetDistanceTo(masterAIPawn);
 			if (targetDistance <= maxAttackRange)
 			{
+				//In AttackRange
 				SetEnemyBehavior(EAIBehaviour::Attack);
 			}
+			//Out OF Range, Chase & Attack
 			else SetEnemyBehavior(EAIBehaviour::Chase);
 		}
 	}
