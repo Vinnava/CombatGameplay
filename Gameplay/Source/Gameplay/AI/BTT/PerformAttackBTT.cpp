@@ -27,7 +27,7 @@ EBTNodeResult::Type UPerformAttackBTT::ExecuteTask(UBehaviorTreeComponent& Owner
 	}
 
 	//Perform Attack
-	FPerformAttack performAttackResult = enemyCombatInterface->PerformAttack(attackType, attackIndex, bRandomIndex, true, playRate);
+	FPerformAttack performAttackResult = enemyCombatInterface->PerformAttack(attackAction, attackIndex, bRandomIndex, true, playRate);
 	if (!performAttackResult.bSuccess)
 	{
 		//Attack Failed
