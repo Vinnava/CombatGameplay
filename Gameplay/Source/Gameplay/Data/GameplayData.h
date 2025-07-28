@@ -14,11 +14,13 @@ enum class EHitDirection
 	Right
 };
 
-enum class EMovementSpeedMode
+UENUM(BlueprintType)
+enum class EMovementSpeedMode : uint8
 {
-	Walking,
-	Jogging,
-	Sprinting
+	Idle        UMETA(DisplayName = "Idle"),
+	Walking     UMETA(DisplayName = "Walking"),
+	Jogging     UMETA(DisplayName = "Jogging"),
+	Sprinting   UMETA(DisplayName = "Sprinting")
 };
 
 enum class EAIBehaviour

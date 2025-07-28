@@ -4,7 +4,7 @@
 #include "SetMovementSpeedBTT.h"
 
 #include "AIController.h"
-#include "GameFramework/CharactermovementComponent.h"
+#include "Gameplay/Character/Enemy/EnemyBase.h"
 
 DEFINE_LOG_CATEGORY_STATIC(GPLogPerformActionBTT, Log, All);
 
@@ -19,14 +19,13 @@ EBTNodeResult::Type USetMovementSpeedBTT::ExecuteTask(UBehaviorTreeComponent& Ow
 		return EBTNodeResult::Failed;
 	}
 
-	if (UCharacterMovementComponent* movementComp = masterAIPawn->FindComponentByClass<UCharacterMovementComponent>())
+	AEnemyBase* enemyAIRef = Cast<AEnemyBase>(masterAIPawn);
+	if (!enemyAIRef)
 	{
-		movementComp->MaxWalkSpeed = movementSpeed;
-		return EBTNodeResult::Succeeded;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("MovementComponent not found on AI Pawn: %s"), *masterAIPawn->GetName());
+		UE_LOG(GPLogPerformActionBTT, Warning,  TEXT("[%s] [ExecuteTask] Enemy cast Failed"), *GetName());
 		return EBTNodeResult::Failed;
 	}
+
+	enemyAIRef->SetMovementSpeedMode(movementSpeedMode);
+	return EBTNodeResult::Succeeded;
 }

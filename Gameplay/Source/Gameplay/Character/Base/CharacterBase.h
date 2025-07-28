@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gameplay/Data/GameplayData.h"
 #include "Gameplay/Interface/CombatInterface.h"
 #include "Gameplay/Interface/GameplayTagInterface.h"
 #include "Logging/LogMacros.h"
@@ -16,8 +17,8 @@ class ACharacterBase : public ACharacter, public IGameplayTagInterface, public I
 	GENERATED_BODY()
 
 private://Variables
-	enum class EMovementSpeedMode movementSpeedMode;
-	enum class EHitDirection hitDirection;
+	EMovementSpeedMode movementSpeedMode;
+	EHitDirection hitDirection;
 	
 protected://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -76,14 +77,15 @@ protected://Functions
 
 	bool CanPerformAttack() const;
 	bool CanPerformDodge() const;
-	void SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode);
-	EMovementSpeedMode GetMovementSpeedMode() const;
 	EHitDirection UpdateAndGetHitDirection(FVector hitLocation);
 	FRotator GetDesiredRotation() const;
 	
 public://Functions
 	ACharacterBase();
 	virtual void PostInitializeComponents() override;
+
+	void SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode);
+	EMovementSpeedMode GetMovementSpeedMode() const;
 	
 #pragma region IGameplayTagInterface
 	

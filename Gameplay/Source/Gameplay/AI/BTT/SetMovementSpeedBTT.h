@@ -3,20 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/Tasks/BTTask_GameplayTaskBase.h"
+#include "Base/BTTaskNodeBaseGP.h"
+#include "Gameplay/Data/GameplayData.h"
 #include "SetMovementSpeedBTT.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAMEPLAY_API USetMovementSpeedBTT : public UBTTask_GameplayTaskBase
+class GAMEPLAY_API USetMovementSpeedBTT : public UBTTaskNodeBaseGP
 {
 	GENERATED_BODY()
 
 protected://Variables
 	UPROPERTY(EditInstanceOnly, Category=Task)
-	float movementSpeed{230.0f};
+	EMovementSpeedMode movementSpeedMode{EMovementSpeedMode::Idle};
 
 public://Functions
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

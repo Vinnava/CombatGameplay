@@ -161,6 +161,11 @@ void ACharacterBase::SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMod
 	float newSpeed;
 	switch (movementSpeedMode)
 	{
+	case EMovementSpeedMode::Idle:
+		newSpeed = 0.0f;
+		movementComp->MaxWalkSpeed = newSpeed;
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Walking: %.2f"), *GetName(), newSpeed);
+		break;
 	case EMovementSpeedMode::Walking:
 		newSpeed = maxWalkSpeed;
 		movementComp->MaxWalkSpeed = newSpeed;
