@@ -12,6 +12,7 @@
 #include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Sight.h"
 
+DEFINE_LOG_CATEGORY_STATIC(GPLogAICEnemy, Log, All);
 
 AAICEnemy::AAICEnemy()
 {
@@ -22,14 +23,29 @@ void AAICEnemy::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	perceptionAIComp->OnPerceptionUpdated.AddDynamic(this, &AAICEnemy::OnPerceptionUpdated);
+	if (perceptionAIComp)
+	{
+		perceptionAIComp->OnPerceptionUpdated.AddDynamic(this, &AAICEnemy::OnPerceptionUpdated);
+	}
+	else UE_LOG(GPLogAICEnemy, Warning, TEXT("[%s] [PostInitializeComponents] perceptionAIComp is null"), *GetName());
 }
 
 void AAICEnemy::OnPossess(APawn* InPawn)
 {
+	Super::OnPossess(InPawn);
+	
 	enemyAIRef = Cast<AEnemyBase>(InPawn);
 
+	if (!enemyAIRef)
+	{
+		UE_LOG(GPLogAICEnemy, Warning, TEXT("[%s] [OnPossess] enemyAIRef is null"), *GetName());
+		return;
+	}
+
+	//Check IsDummy
 	if (enemyAIRef->bIsDummy) return;
+
+	//Run AI
 	enemyAIRef->combatComp->onToggleCombat.AddUObject(this, &AAICEnemy::SetBlackboardCombatEnable);
 	RunBehaviorTree(enemyAIRef->BehaviorTreeRef);
 }
@@ -57,7 +73,7 @@ void AAICEnemy::OnPerceptionUpdated(const TArray<AActor*>& sensedActors)
 			
 			if (senseID == sightID) // Handle Sight
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Sight detected: %s"), *sensedActor->GetName());
+				UE_LOG(GPLogAICEnemy, Log, TEXT("[%s] [OnPossess] Sight detected: %s"), *GetName(), *sensedActor->GetName());
 				
 				if (lastSensedStimul.WasSuccessfullySensed() || characterRef->HasMatchingGameplayTag(tagsToCheck))
 				{
@@ -67,7 +83,7 @@ void AAICEnemy::OnPerceptionUpdated(const TArray<AActor*>& sensedActors)
 			}
 			else if (senseID == damageID) // Handle Damage
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Damage sensed from: %s"), *sensedActor->GetName());
+				UE_LOG(GPLogAICEnemy, Log, TEXT("[%s] [OnPossess] Damage sensed from: %s"), *GetName(), *sensedActor->GetName());
 
 				if (lastSensedStimul.WasSuccessfullySensed() || characterRef->HasMatchingGameplayTag(tagsToCheck))
 				{

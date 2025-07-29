@@ -6,7 +6,7 @@
 #include "AIController.h"
 #include "Gameplay/Character/Enemy/EnemyBase.h"
 
-DEFINE_LOG_CATEGORY_STATIC(GPLogPerformActionBTT, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(GPLogSetMovementSpeedBTT, Log, All);
 
 
 EBTNodeResult::Type USetMovementSpeedBTT::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -15,14 +15,14 @@ EBTNodeResult::Type USetMovementSpeedBTT::ExecuteTask(UBehaviorTreeComponent& Ow
 	APawn* masterAIPawn = masterAIController ? masterAIController->GetPawn() : nullptr;
 	if (!masterAIPawn)
 	{
-		UE_LOG(GPLogPerformActionBTT, Warning, TEXT("[%s] [ExecuteTask] Pawn is null"), *GetName());
+		UE_LOG(GPLogSetMovementSpeedBTT, Warning, TEXT("[%s] [ExecuteTask] Pawn is null"), *GetName());
 		return EBTNodeResult::Failed;
 	}
 
 	AEnemyBase* enemyAIRef = Cast<AEnemyBase>(masterAIPawn);
 	if (!enemyAIRef)
 	{
-		UE_LOG(GPLogPerformActionBTT, Warning,  TEXT("[%s] [ExecuteTask] Enemy cast Failed"), *GetName());
+		UE_LOG(GPLogSetMovementSpeedBTT, Warning,  TEXT("[%s] [ExecuteTask] Enemy cast Failed"), *GetName());
 		return EBTNodeResult::Failed;
 	}
 

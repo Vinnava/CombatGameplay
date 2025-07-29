@@ -31,16 +31,18 @@ void UUpdateEnemyBTS::SetEnemyBehavior(EAIBehaviour newBehaviour)
 
 void UUpdateEnemyBTS::UpdateBehavior()
 {
-	if (!masterAIPawn && !masterAIController)
+	if (!masterAIPawn || !masterAIController)
 	{
-		UE_LOG(GPLogUpdateEnemyBTS, Error, TEXT("[%s] [UpdateBehavior] Couldn't able to update behaviour : masterAI or masterAIController is null"), *GetName());
+		FString  logP = masterAIPawn ? masterAIPawn->GetName() : TEXT("None");
+		UE_LOG(GPLogUpdateEnemyBTS, Warning, TEXT("[%s] [UpdateBehavior] masterAIPawn: %s"), *GetName(), *logP);
+		//UE_LOG(GPLogUpdateEnemyBTS, Error, TEXT("[%s] [UpdateBehavior] Couldn't able to update behaviour : masterAI or masterAIController is null"), *GetName());
 		return;
 	}
 
 	AEnemyBase* enemyAIRef = Cast<AEnemyBase>(masterAIPawn);
 	if (!enemyAIRef)
 	{
-		UE_LOG(GPLogUpdateEnemyBTS, Warning, TEXT("[%s] [UpdateBehavior] AEnemyBase cast Failed"), *GetName());
+		UE_LOG(GPLogUpdateEnemyBTS, Error, TEXT("[%s] [UpdateBehavior] Cast to AEnemyBase FAILED — actual class: %s"), *GetName(), *masterAIPawn->GetClass()->GetName());
 		return;
 	}
 
