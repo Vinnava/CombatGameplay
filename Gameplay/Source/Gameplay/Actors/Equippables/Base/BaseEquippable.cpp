@@ -15,7 +15,8 @@ ABaseEquippable::ABaseEquippable()
 	PrimaryActorTick.bCanEverTick = false;
 
 	itemMesh = CreateDefaultSubobject<UStaticMeshComponent>("ItemMesh");
-	itemMesh->SetupAttachment(RootComponent);
+	SetRootComponent(itemMesh);
+	
 	itemMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	itemMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	itemMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));

@@ -21,8 +21,8 @@ protected://Variables
 	TObjectPtr<class UWidgetComponent> healthWidget;
 
 public://Variables
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Initialize|Dummy")
-	bool bIsDummy;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Initialize|Dummy")
+	bool bIsDummy{false};
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Initialize|AI")
 	TObjectPtr<class UBehaviorTree> BehaviorTreeRef;

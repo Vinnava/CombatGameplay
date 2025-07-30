@@ -53,8 +53,8 @@ void UUpdateEnemyBTS::UpdateBehavior()
 	}
 	else
 	{
-		AActor* targetActor = UBTFunctionLibrary::GetBlackboardValueAsActor(this, target);
-		if (!targetActor)
+		UObject* targetObject = blackboardComp->GetValueAsObject(target.SelectedKeyName);
+		if (!targetObject)
 		{
 			//Player Wasn't Deducted
 			bCanSeeTarget = false;
@@ -66,6 +66,7 @@ void UUpdateEnemyBTS::UpdateBehavior()
 			enemyAIRef->SetHealthBarWidgetVisibility(true);
 			bCanSeeTarget = true;
 
+			AActor* targetActor = Cast<AActor>(targetObject);
 			float targetDistance = targetActor->GetDistanceTo(masterAIPawn);
 			if (targetDistance <= maxAttackRange)
 			{
