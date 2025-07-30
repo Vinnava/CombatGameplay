@@ -144,7 +144,7 @@ void ACharacterBase::SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMod
 {
 	if (newMovementSpeedMode == movementSpeedMode) 
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed mode unchanged: %d"), *GetName(), (int32)movementSpeedMode);
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed mode unchanged: %s"), *GetName(), *UEnum::GetDisplayValueAsText(movementSpeedMode).ToString());
 		return;
 	}
 
@@ -164,7 +164,7 @@ void ACharacterBase::SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMod
 	case EMovementSpeedMode::Idle:
 		newSpeed = 0.0f;
 		movementComp->MaxWalkSpeed = newSpeed;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Walking: %.2f"), *GetName(), newSpeed);
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Idle: %.2f"), *GetName(), newSpeed);
 		break;
 	case EMovementSpeedMode::Walking:
 		newSpeed = maxWalkSpeed;

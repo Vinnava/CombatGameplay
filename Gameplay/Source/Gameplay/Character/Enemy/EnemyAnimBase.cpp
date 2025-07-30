@@ -1,16 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Gameplay//Character/Player/PlayerAnimBase.h"
+#include "EnemyAnimBase.h"
 
-void UPlayerAnimBase::NativeInitializeAnimation()
+void UEnemyAnimBase::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
 	
 }
 
-void UPlayerAnimBase::NativeUpdateAnimation(float DeltaSeconds)
+void UEnemyAnimBase::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 

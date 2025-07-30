@@ -25,7 +25,9 @@ EBTNodeResult::Type USetMovementSpeedBTT::ExecuteTask(UBehaviorTreeComponent& Ow
 		UE_LOG(GPLogSetMovementSpeedBTT, Warning,  TEXT("[%s] [ExecuteTask] Enemy cast Failed"), *GetName());
 		return EBTNodeResult::Failed;
 	}
-
+	
+	if (enemyAIRef->GetMovementSpeedMode() == movementSpeedMode) return EBTNodeResult::Succeeded;
+	
 	enemyAIRef->SetMovementSpeedMode(movementSpeedMode);
 	return EBTNodeResult::Succeeded;
 }

@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "PlayerAnimBase.generated.h"
+#include "EnemyAnimBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAMEPLAY_API UPlayerAnimBase : public UAnimInstance
+class GAMEPLAY_API UEnemyAnimBase : public UAnimInstance
 {
 	GENERATED_BODY()
 
 private://Variables
-	TObjectPtr<class AEnemyBase> playerCharacter;
+	TObjectPtr<class AEnemyBase> enemyAICharacter;
 	TObjectPtr<class UMovementComponent> movementComp;
 
 	FVector velocity;
