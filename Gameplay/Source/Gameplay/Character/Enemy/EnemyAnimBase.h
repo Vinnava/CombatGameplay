@@ -16,12 +16,15 @@ class GAMEPLAY_API UEnemyAnimBase : public UAnimInstance
 
 private://Variables
 	TObjectPtr<class AEnemyBase> enemyAICharacter;
-	TObjectPtr<class UMovementComponent> movementComp;
-
-	FVector velocity;
-	float GroundSpeed;
+	TObjectPtr<class UCharacterMovementComponent> movementComp;
 	
 protected://Variables
+	UPROPERTY(BlueprintReadOnly, Category = MovementData)
+	FVector velocity;
+	
+	UPROPERTY(BlueprintReadOnly, Category = MovementData)
+	float groundSpeed;
+	
 	UPROPERTY(BlueprintReadOnly, Category = MovementData)
 	bool bShouldMove;
 	

@@ -15,13 +15,18 @@ class GAMEPLAY_API UPlayerAnimBase : public UAnimInstance
 	GENERATED_BODY()
 
 private://Variables
-	TObjectPtr<class AEnemyBase> playerCharacter;
-	TObjectPtr<class UMovementComponent> movementComp;
+	TObjectPtr<class APlayerBase> playerCharacter;
+	TObjectPtr<class UCharacterMovementComponent> movementComp;
 
 	FVector velocity;
-	float GroundSpeed;
 	
 protected://Variables
+	UPROPERTY(BlueprintReadOnly, Category = MovementData)
+	TObjectPtr<class UCharacterTrajectoryComponent> trajectoryComp;
+
+	UPROPERTY(BlueprintReadOnly, Category = MovementData)
+	float groundSpeed;
+	
 	UPROPERTY(BlueprintReadOnly, Category = MovementData)
 	bool bShouldMove;
 	
