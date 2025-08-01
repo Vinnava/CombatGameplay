@@ -46,11 +46,9 @@ void UPlayerAnimBase::NativeUpdateAnimation(float DeltaSeconds)
 
 	//GroundSpeed
 	groundSpeed = UKismetMathLibrary::VSizeXY(velocity);
-	UE_LOG(GPLogPlayerAnimBase, Log, TEXT("[%s] groundSpeed : %f"), *GetName(), groundSpeed);
 
 	//Should Move
 	bShouldMove = groundSpeed > 3.0f && !movementComp->GetCurrentAcceleration().IsNearlyZero();
-	UE_LOG(GPLogPlayerAnimBase, Log, TEXT("[%s] bShouldMove : %hs"), *GetName(), bShouldMove ? "true" : "false");
 
 	//Is Falling
 	bIsFalling = movementComp->IsFalling();

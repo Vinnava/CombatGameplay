@@ -17,7 +17,6 @@ enum class EHitDirection
 UENUM(BlueprintType)
 enum class EMovementSpeedMode : uint8
 {
-	Idle        UMETA(DisplayName = "Idle"),
 	Walking     UMETA(DisplayName = "Walking"),
 	Jogging     UMETA(DisplayName = "Jogging"),
 	Sprinting   UMETA(DisplayName = "Sprinting")
