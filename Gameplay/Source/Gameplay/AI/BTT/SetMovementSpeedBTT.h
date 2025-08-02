@@ -17,7 +17,7 @@ class GAMEPLAY_API USetMovementSpeedBTT : public UBTTaskNodeBaseGP
 
 protected://Variables
 	UPROPERTY(EditInstanceOnly, Category=Task)
-	EMovementSpeedMode movementSpeedMode{};
+	EMovementSpeedMode movementSpeedMode {EMovementSpeedMode::None};
 
 public://Functions
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

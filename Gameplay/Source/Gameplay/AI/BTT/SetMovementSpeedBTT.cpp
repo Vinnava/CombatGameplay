@@ -26,7 +26,7 @@ EBTNodeResult::Type USetMovementSpeedBTT::ExecuteTask(UBehaviorTreeComponent& Ow
 		return EBTNodeResult::Failed;
 	}
 	
-	if (enemyAIRef->GetMovementSpeedMode() == movementSpeedMode) return EBTNodeResult::Succeeded;
+	/*if (enemyAIRef->GetMovementSpeedMode() == movementSpeedMode) return EBTNodeResult::Succeeded;*/
 	
 	enemyAIRef->SetMovementSpeedMode(movementSpeedMode);
 	return EBTNodeResult::Succeeded;

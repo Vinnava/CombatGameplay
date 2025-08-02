@@ -17,7 +17,7 @@ class ACharacterBase : public ACharacter, public IGameplayTagInterface, public I
 	GENERATED_BODY()
 
 private://Variables
-	EMovementSpeedMode movementSpeedMode;
+	EMovementSpeedMode movementSpeedMode {EMovementSpeedMode::None};
 	EHitDirection hitDirection;
 	
 protected://Variables
@@ -84,7 +84,7 @@ public://Functions
 	ACharacterBase();
 	virtual void PostInitializeComponents() override;
 
-	void SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode);
+	void SetMovementSpeedMode(const EMovementSpeedMode newMovementSpeedMode);
 	EMovementSpeedMode GetMovementSpeedMode() const;
 	
 #pragma region IGameplayTagInterface

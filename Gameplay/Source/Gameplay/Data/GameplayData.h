@@ -8,6 +8,7 @@
 
 enum class EHitDirection
 {
+	None,
 	Front,
 	Back,
 	Left,
@@ -17,6 +18,7 @@ enum class EHitDirection
 UENUM(BlueprintType)
 enum class EMovementSpeedMode : uint8
 {
+	None		UMETA(DisplayName = "None"),
 	Walking     UMETA(DisplayName = "Walking"),
 	Jogging     UMETA(DisplayName = "Jogging"),
 	Sprinting   UMETA(DisplayName = "Sprinting")

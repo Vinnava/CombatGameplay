@@ -42,11 +42,10 @@ ACharacterBase::ACharacterBase()
 	GetCharacterMovement()->bOrientRotationToMovement = false; 
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); 
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	/*GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;*/
 
 	//Creating Components
 	statsComp = CreateDefaultSubobject<UStatsComponent>("StatsComponent");
@@ -72,6 +71,8 @@ void ACharacterBase::PostInitializeComponents()
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetMovementSpeedMode(EMovementSpeedMode::Jogging);
 
 	if (equipComp)
 	{
@@ -140,7 +141,7 @@ bool ACharacterBase::CanPerformDodge() const
 	return bCanDodge;
 }
 
-void ACharacterBase::SetMovementSpeedMode(EMovementSpeedMode newMovementSpeedMode)
+void ACharacterBase::SetMovementSpeedMode(const EMovementSpeedMode newMovementSpeedMode)
 {
 	if (newMovementSpeedMode == movementSpeedMode)
 	{
