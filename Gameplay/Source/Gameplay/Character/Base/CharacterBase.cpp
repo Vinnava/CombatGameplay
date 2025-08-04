@@ -266,7 +266,7 @@ float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, 
 	{
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit reaction performed, applying time dilation"), *GetName());
 		
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f);
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.3f);
 		
 		float delayTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld()) * 1.2f;
 		FTimerHandle timerHandleUpdateDamage;
@@ -300,7 +300,8 @@ void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* ins
 	if (playerController && playerController->PlayerCameraManager)
 	{
 		playerController->PlayerCameraManager->StartCameraShake(UAttackCameraShake::StaticClass(), 0.5f, 
-			ECameraShakePlaySpace::CameraLocal, FRotator::ZeroRotator);
+																ECameraShakePlaySpace::CameraLocal,
+																FRotator::ZeroRotator);
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Camera shake applied"), *GetName());
 	}
 	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [ApplyDamage] Could not apply camera shake - PlayerController or CameraManager is null"), *GetName());
@@ -824,7 +825,6 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		400.0f, objectTypes, false, {this}, EDrawDebugTrace::ForDuration, hitResult, true);
 
 	// Calculate positioning transform
-	/*FTransform targetTransform;*/
 	FVector targetLocation = GetActorLocation(); // Default to current location
 	FRotator targetRotation = GetActorRotation(); // Default to current rotation
 
@@ -838,7 +838,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 
 		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
 		
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack positioning: %s"), *GetName(), *hitActor->GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetName(), *hitActor->GetName());
 	}
 	else
 	{
@@ -846,16 +846,15 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
 	}
 
-
-	/*targetTransform.SetLocation(targetLocation);
-	targetTransform.SetRotation(targetRotation.Quaternion());*/
-
 	// Play attack animation
 	USkeletalMeshComponent* MeshComp = GetMesh();
 	if (MeshComp && MeshComp->GetAnimInstance())
 	{
-		float attackDuration = MeshComp->GetAnimInstance()->Montage_Play(attackMontage, playRate,
-			EMontagePlayReturnType::Duration, 0.0f, true);
+		float attackDuration = MeshComp->GetAnimInstance()->Montage_Play(attackMontage,
+																		playRate,
+																		EMontagePlayReturnType::Duration,
+																		0.0f,
+																		true);
 		
 		returnPerformAttack.attackDuration = attackDuration;
 		returnPerformAttack.bSuccess = true;
