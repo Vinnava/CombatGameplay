@@ -9,7 +9,6 @@
 #include "Gameplay/Character/Base/CharacterBase.h"
 
 
-// Sets default values for this component's properties
 UCollisionComponent::UCollisionComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
@@ -17,7 +16,6 @@ UCollisionComponent::UCollisionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-// Called every frame
 void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -28,37 +26,27 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 }
 
-//Activates the collision functionality for the UCollisionComponent.
 void UCollisionComponent::ActivateCollision()
 {
 	ClearHitActors();
 	bIsCollisionEnabled = true;
 }
 
-//Deactivates the collision functionality for the UCollisionComponent.
 void UCollisionComponent::DeactivateCollision()
 {
 	bIsCollisionEnabled = false;
 }
 
-//Clears the list of actors that have already been hit by the collision trace.
 void UCollisionComponent::ClearHitActors()
 {
 	alreadyHitActors.Empty();
 }
 
-//Sets the collision mesh component for the collision system.
 void UCollisionComponent::SetCollisionMeshComponent(TObjectPtr<UPrimitiveComponent> collisionMesh)
 {
 	collisionMeshComp = collisionMesh;
 }
 
-/**
- * Performs a collision trace between two specified socket locations and processes the results.
- * 
- * If valid hit actors are detected, the results are broadcasted via the `onHitCollision` delegate/event
- * with the last hit result for subscribing systems to respond to.
- */
 void UCollisionComponent::CollisionTrace()
 {
 	FVector startLoc = collisionMeshComp->GetSocketLocation(startSocketName);
@@ -84,24 +72,20 @@ void UCollisionComponent::CollisionTrace()
 	}
 
 	// Perform the multi-sphere trace
-	bool bHit = GetWorld()->SweepMultiByObjectType(
-		hitResults,
-		startLoc,
-		endLoc,
-		FQuat::Identity,
-		objectParams,
-		sphereShape,
-		queryParams
-	);
+	bool bHit = GetWorld()->SweepMultiByObjectType(hitResults,
+													startLoc,
+													endLoc,
+													FQuat::Identity,
+													objectParams,
+													sphereShape,
+													queryParams);
 
 	// Process results
 	if (bHit)
 	{
 		for (const FHitResult& hitResult : hitResults)
 		{
-			AActor* hitActor = hitResult.GetActor();
-			//ACharacterBase* hitActor = Cast<ACharacterBase>(hitResult.GetActor());
-			if (hitActor)
+			if (AActor* hitActor = hitResult.GetActor())
 			{
 				if (const IGameplayTagInterface* hitActorTagInterface = Cast<IGameplayTagInterface>(hitActor))
 				{

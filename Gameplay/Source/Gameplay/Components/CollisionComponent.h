@@ -23,18 +23,18 @@ private://Variables
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FName endSocketName;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-	float traceRadius;
+	float traceRadius{0.0f};
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	TArray<TEnumAsByte<ECollisionChannel>> traceObjectTypes;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	TArray<TObjectPtr<AActor>> actorsToIgnore;
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-	TEnumAsByte<EDrawDebugTrace::Type> drawDebugType;
+	TEnumAsByte<EDrawDebugTrace::Type> drawDebugType{};
 	UPROPERTY(EditDefaultsOnly, Category = "Initialization")
 	FGameplayTagContainer ignoreGameplayTags;
 #pragma endregion
 	
-	TObjectPtr<UPrimitiveComponent> collisionMeshComp;
+	TObjectPtr<UPrimitiveComponent> collisionMeshComp ;
 	bool bIsCollisionEnabled{false};
 	FHitResult lastHitResult;
 	TObjectPtr<AActor> lastHitActor;
@@ -53,10 +53,19 @@ public://Functions
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
+	//Activates the collision functionality for the UCollisionComponent.
 	void ActivateCollision();
+	
+	//Deactivates the collision functionality for the UCollisionComponent.
 	void DeactivateCollision();
+	
+	//Clears the list of actors that have already been hit by the collision trace.
 	void ClearHitActors();
+
+	//Sets the collision mesh component for the collision system.
 	void SetCollisionMeshComponent(TObjectPtr<UPrimitiveComponent> collisionMesh);
+
+	//Performs a collision trace between two specified socket locations and processes the results.
 	void CollisionTrace();
 	
 #pragma region Getters
