@@ -9,6 +9,8 @@
 #include "Gameplay/Components/CombatComponent.h"
 #include "Gameplay/Data/GameplayTagLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Damage.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Sight.h"
 
@@ -16,13 +18,32 @@ DEFINE_LOG_CATEGORY_STATIC(GPLogAICEnemy, Log, All);
 
 AAICEnemy::AAICEnemy()
 {
+	// Perception Component
 	perceptionAIComp = CreateDefaultSubobject<UAIPerceptionComponent>("AIPerceptionComp");
+
+	// Sight sense
+	sightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	sightConfig->SightRadius = 2000.f;
+	sightConfig->LoseSightRadius = 2500.f;
+	sightConfig->PeripheralVisionAngleDegrees = 90.f;
+	sightConfig->SetMaxAge(5.f);
+
+	sightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	sightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	sightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+
+	perceptionAIComp->ConfigureSense(*sightConfig);
+	perceptionAIComp->SetDominantSense(sightConfig->GetSenseImplementation());
+
+	// Damage sense
+	damageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
+	perceptionAIComp->ConfigureSense(*damageConfig);
 }
 
 void AAICEnemy::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
+	
 	if (perceptionAIComp)
 	{
 		perceptionAIComp->OnPerceptionUpdated.AddDynamic(this, &AAICEnemy::OnPerceptionUpdated);
@@ -57,7 +78,11 @@ void AAICEnemy::OnPerceptionUpdated(const TArray<AActor*>& sensedActors)
 	for (AActor* sensedActor : sensedActors)
 	{
 		ACharacterBase* characterRef = Cast<ACharacterBase>(sensedActor);
-		if (!characterRef) return;
+		if (!characterRef)
+		{
+			UE_LOG(GPLogAICEnemy, Error, TEXT("[%s] [OnPerceptionUpdated] CharacterBase cast failed "), *GetName());
+			return;
+		}
 			
 		FActorPerceptionBlueprintInfo info;
 		perceptionAIComp->GetActorsPerception(sensedActor, info);
@@ -73,7 +98,7 @@ void AAICEnemy::OnPerceptionUpdated(const TArray<AActor*>& sensedActors)
 			
 			if (senseID == sightID) // Handle Sight
 			{
-				UE_LOG(GPLogAICEnemy, Log, TEXT("[%s] [OnPossess] Sight detected: %s"), *GetName(), *sensedActor->GetName());
+				UE_LOG(GPLogAICEnemy, Log, TEXT("[%s] [OnPerceptionUpdated] Sight detected: %s"), *GetName(), *sensedActor->GetName());
 				
 				if (lastSensedStimul.WasSuccessfullySensed() || characterRef->HasMatchingGameplayTag(tagsToCheck))
 				{
@@ -83,7 +108,7 @@ void AAICEnemy::OnPerceptionUpdated(const TArray<AActor*>& sensedActors)
 			}
 			else if (senseID == damageID) // Handle Damage
 			{
-				UE_LOG(GPLogAICEnemy, Log, TEXT("[%s] [OnPossess] Damage sensed from: %s"), *GetName(), *sensedActor->GetName());
+				UE_LOG(GPLogAICEnemy, Log, TEXT("[%s] [OnPerceptionUpdated] Damage sensed from: %s"), *GetName(), *sensedActor->GetName());
 
 				if (lastSensedStimul.WasSuccessfullySensed() || characterRef->HasMatchingGameplayTag(tagsToCheck))
 				{

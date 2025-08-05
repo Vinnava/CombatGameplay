@@ -7,6 +7,7 @@
 #include "Gameplay/UI/Player/HealthBarWidget.h"
 
 
+
 AEnemyBase::AEnemyBase()
 {
 	healthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));

@@ -19,6 +19,7 @@ private://Variables
 	
 protected://Variables
 	TObjectPtr<class UWidgetComponent> healthWidget;
+	/*TObjectPtr<class UAIPerceptionStimuliSourceComponent> stimuliSource;*/
 
 public://Variables
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Initialize|Dummy")

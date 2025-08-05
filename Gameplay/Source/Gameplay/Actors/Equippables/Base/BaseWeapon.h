@@ -28,25 +28,25 @@ protected://Variables
 	TObjectPtr<class UCombatComponent> combatComp;
 
 public://Variables
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TArray<TObjectPtr<UAnimMontage>> lightAttackMontages;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TArray<TObjectPtr<UAnimMontage>> dodgeMontages;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TArray<TObjectPtr<UAnimMontage>> dieMontages;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TObjectPtr<UAnimMontage> hitMontage_F;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TObjectPtr<UAnimMontage> hitMontage_B;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TObjectPtr<UAnimMontage> hitMontage_R;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animations)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialization|Animations")
 	TObjectPtr<UAnimMontage> hitMontage_L;
 
 private://Functions

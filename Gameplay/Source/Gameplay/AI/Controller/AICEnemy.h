@@ -16,6 +16,9 @@ class GAMEPLAY_API AAICEnemy : public AAIController
 
 private://Variables
 	TObjectPtr<UAIPerceptionComponent> perceptionAIComp;
+	TObjectPtr<class UAISenseConfig_Sight> sightConfig;
+	TObjectPtr<class UAISenseConfig_Damage> damageConfig;
+	
 	
 	TObjectPtr<class AEnemyBase> enemyAIRef;
 	
