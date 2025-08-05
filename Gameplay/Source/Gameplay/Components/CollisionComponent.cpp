@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "Gameplay/Character/Base/CharacterBase.h"
 
+DEFINE_LOG_CATEGORY_STATIC(GPLogCollisionComp, Log, All);
 
 UCollisionComponent::UCollisionComponent()
 {
@@ -98,6 +99,7 @@ void UCollisionComponent::CollisionTrace()
 						onHitCollision.Broadcast(lastHitResult);
 					}
 				}
+				else UE_LOG(GPLogCollisionComp, Error, TEXT("[%s] [CollisionTrace] Cast failed IGameplayTagInterface"), *GetName());
 			}
 		}
 	}

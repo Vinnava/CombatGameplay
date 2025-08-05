@@ -229,7 +229,7 @@ FRotator ACharacterBase::GetDesiredRotation() const
 	}
 	else
 	{
-		// No input → return current actor rotation
+		// No input -> return current actor rotation 
 		FRotator currentRotation = GetActorRotation();
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Desired rotation (no input): %s"), *GetName(), *currentRotation.ToString());
 		return currentRotation;
@@ -266,7 +266,7 @@ float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, 
 	{
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit reaction performed, applying time dilation"), *GetName());
 		
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.3f);
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 		
 		float delayTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld()) * 1.2f;
 		FTimerHandle timerHandleUpdateDamage;
@@ -817,12 +817,14 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	stateManagerComp->SetCurrentAction(attackType);
 
 	// Perform target detection for positioning
-	FHitResult hitResult;
+	FHitResult hitResult {NULL};
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	
-	bool bHitTarget = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(), GetActorLocation(),
-		400.0f, objectTypes, false, {this}, EDrawDebugTrace::ForDuration, hitResult, true);
+	bool bHitTarget = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(),
+																		GetActorLocation(),400.0f, objectTypes,
+																		false,{this},
+																		EDrawDebugTrace::ForDuration,hitResult, true);
 
 	// Calculate positioning transform
 	FVector targetLocation = GetActorLocation(); // Default to current location
@@ -831,20 +833,25 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	if (bHitTarget && hitResult.GetActor())
 	{
 		const AActor* hitActor = hitResult.GetActor();
-		const FVector forwardVectorToTarget = UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::FindLookAtRotation(hitActor->GetActorLocation(), GetActorLocation()));
-		
-		targetLocation = hitActor->GetActorLocation() + (forwardVectorToTarget * 200.0f);
-		targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
+		const ACharacterBase* characterRef = Cast<ACharacterBase>(hitActor);
 
-		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
+		FGameplayTagContainer tagsToCheck;
+		tagsToCheck.AddTag(GameplayTags::State::Dead());
 		
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetName(), *hitActor->GetName());
+		if (!characterRef->stateManagerComp->IsCurrentStateEqualToAny(tagsToCheck))
+		{
+			const FVector forwardVectorToTarget = UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::FindLookAtRotation(hitActor->GetActorLocation(), GetActorLocation()));
+		
+			targetLocation = hitActor->GetActorLocation() + (forwardVectorToTarget * 200.0f);
+			targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
+		
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetName(), *hitActor->GetName());
+		}
+		else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target id Dead, using current transform"), *GetName());
 	}
-	else
-	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetName());
-		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
-	}
+	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetName());
+
+	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
 
 	// Play attack animation
 	USkeletalMeshComponent* MeshComp = GetMesh();
