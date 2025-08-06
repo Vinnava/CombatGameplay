@@ -21,7 +21,7 @@ void UStateManagerComponent::SetCurrentState(FGameplayTag newState)
 			playerRef->playerWidgetRef->UpdateCurrentStateText(currentState);
 		}
 	}
-	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetName(), *currentState.ToString());
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentState = %s"), *GetOwner()->GetClass()->GetName(), *currentState.ToString());
 }
 
 FGameplayTag UStateManagerComponent::GetCurrentState()
@@ -32,7 +32,7 @@ FGameplayTag UStateManagerComponent::GetCurrentState()
 void UStateManagerComponent::ResetState()
 {
 	SetCurrentState(FGameplayTag::EmptyTag);
-	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] ResetState"), *GetName());
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] ResetState"), *GetOwner()->GetClass()->GetName());
 }
 
 bool UStateManagerComponent::IsCurrentStateEqualToAny(FGameplayTagContainer statesToCheck)
@@ -53,7 +53,7 @@ void UStateManagerComponent::SetCurrentAction(FGameplayTag newAction)
 			playerRef->playerWidgetRef->UpdateCurrentActionText(currentAction);
 		}
 	}
-	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetName(), *currentAction.ToString());
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] CurrentAction = %s"), *GetOwner()->GetClass()->GetName(), *currentAction.ToString());
 }
 
 FGameplayTag UStateManagerComponent::GetCurrentAction()
@@ -64,7 +64,7 @@ FGameplayTag UStateManagerComponent::GetCurrentAction()
 void UStateManagerComponent::ResetAction()
 {
 	SetCurrentAction(FGameplayTag::EmptyTag);
-	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] ResetAction"), *GetName());
+	UE_LOG(GPLogStateManagerComp, Log, TEXT("[%s] ResetAction"), *GetOwner()->GetClass()->GetName());
 }
 
 bool UStateManagerComponent::IsCurrentActionEqualToAny()

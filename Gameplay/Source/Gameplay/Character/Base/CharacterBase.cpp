@@ -65,7 +65,7 @@ void ACharacterBase::PostInitializeComponents()
 		statsComp->OnHealthChanged.AddDynamic(this, &ACharacterBase::OnHealthChanged);
 		stateManagerComp->OnCharacterStateBegin.AddUObject(this, &ACharacterBase::OnCharacterStateBegin);
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PostInitializeComponents] statsComp or stateManagerComp is null"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PostInitializeComponents] statsComp or stateManagerComp is null"), *GetClass()->GetName());
 }
 
 void ACharacterBase::BeginPlay()
@@ -77,16 +77,16 @@ void ACharacterBase::BeginPlay()
 	if (equipComp)
 	{
 		equipComp->InitializeEquipment();
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Equipment initialized"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Equipment initialized"), *GetClass()->GetName());
 	}
-	else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [BeginPlay] Cannot initialize equipment: equipComp is null"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [BeginPlay] Cannot initialize equipment: equipComp is null"), *GetClass()->GetName());
 }
 
 bool ACharacterBase::CanPerformAttack() const
 {
 	if (!stateManagerComp || !combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanPerformAttack] combatComp or stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanPerformAttack] combatComp or stateManagerComp is null"), *GetClass()->GetName());
 		return false;
 	}
 
@@ -105,17 +105,17 @@ void ACharacterBase::Attack()
 {
 	if (!CanPerformAttack())
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [Attack] Cannot perform attack - CanPerformAttack returns False"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [Attack] Cannot perform attack - CanPerformAttack returns False"), *GetClass()->GetName());
 		return;
 	}
 
 	if (!combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [Attack] combatComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [Attack] combatComp is null"), *GetClass()->GetName());
 		return;
 	}
 
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing light attack"), *GetName());
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing light attack"), *GetClass()->GetName());
 	PerformAttack(GameplayTags::Action::LightAttack(), combatComp->attackCount, false, false, 1.0f);
 }
 
@@ -123,7 +123,7 @@ bool ACharacterBase::CanPerformDodge() const
 {
 	if (!stateManagerComp || !combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanPerformDodge] stateManagerComp or combatComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanPerformDodge] stateManagerComp or combatComp is null"), *GetClass()->GetName());
 		return false;
 	}
 	
@@ -145,14 +145,14 @@ void ACharacterBase::SetMovementSpeedMode(const EMovementSpeedMode newMovementSp
 {
 	if (newMovementSpeedMode == movementSpeedMode)
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed mode unchanged: %s"), *GetName(), *UEnum::GetDisplayValueAsText(movementSpeedMode).ToString());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed mode unchanged: %s"), *GetClass()->GetName(), *UEnum::GetDisplayValueAsText(movementSpeedMode).ToString());
 		return;
 	}
 
 	UCharacterMovementComponent* movementComp = GetCharacterMovement();
 	if (!movementComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [SetMovementSpeedMode] CharacterMovementComponent is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [SetMovementSpeedMode] CharacterMovementComponent is null"), *GetClass()->GetName());
 		return;
 	}
 
@@ -165,20 +165,20 @@ void ACharacterBase::SetMovementSpeedMode(const EMovementSpeedMode newMovementSp
 	case EMovementSpeedMode::Walking:
 		newSpeed = maxWalkSpeed;
 		movementComp->MaxWalkSpeed = newSpeed;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Walking: %.2f"), *GetName(), newSpeed);
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Walking: %.2f"), *GetClass()->GetName(), newSpeed);
 		break;
 	case EMovementSpeedMode::Jogging:
 		newSpeed = maxJogSpeed;
 		movementComp->MaxWalkSpeed = newSpeed;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Jogging: %.2f"), *GetName(), newSpeed);
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Jogging: %.2f"), *GetClass()->GetName(), newSpeed);
 		break;
 	case EMovementSpeedMode::Sprinting:
 		newSpeed = maxSprintSpeed;
 		movementComp->MaxWalkSpeed = newSpeed;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Sprinting: %.2f"), *GetName(), newSpeed);
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed set to Sprinting: %.2f"), *GetClass()->GetName(), newSpeed);
 		break;
 	default:
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [SetMovementSpeedMode] Invalid movement speed mode: %d"), *GetName(), (int32)movementSpeedMode);
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [SetMovementSpeedMode] Invalid movement speed mode: %d"), *GetClass()->GetName(), (int32)movementSpeedMode);
 		movementSpeedMode = previousMode; // Revert to previous mode
 		break;
 	}
@@ -224,28 +224,28 @@ FRotator ACharacterBase::GetDesiredRotation() const
 	{
 		// Return rotation based on input vector
 		FRotator inputRotation = InputVector.Rotation();
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Desired rotation from input: %s"), *GetName(), *inputRotation.ToString());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Desired rotation from input: %s"), *GetClass()->GetName(), *inputRotation.ToString());
 		return inputRotation;
 	}
 	else
 	{
 		// No input -> return current actor rotation 
 		FRotator currentRotation = GetActorRotation();
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Desired rotation (no input): %s"), *GetName(), *currentRotation.ToString());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Desired rotation (no input): %s"), *GetClass()->GetName(), *currentRotation.ToString());
 		return currentRotation;
 	}
 }
 
 float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, AController* eventInstigator, AActor* damageCauser)
 {
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Taking damage: %.2f from %s"), *GetName(), damage, 
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Taking damage: %.2f from %s"), *GetClass()->GetName(), damage, 
 		   damageCauser ? *damageCauser->GetName() : TEXT("Unknown"));
 
 	float actualDamage = Super::TakeDamage(damage, damageEvent, eventInstigator, damageCauser);
 
 	if (!CanReciveDamage())
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Cannot receive damage in current state"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Cannot receive damage in current state"), *GetClass()->GetName());
 		return 0.0f;
 	}
 
@@ -255,16 +255,16 @@ float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, 
 	{
 		const FPointDamageEvent& PointDamageEvent = static_cast<const FPointDamageEvent&>(damageEvent);
 		hitLocation = PointDamageEvent.HitInfo.ImpactPoint;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit location extracted: %s"), *GetName(), *hitLocation.ToString());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit location extracted: %s"), *GetClass()->GetName(), *hitLocation.ToString());
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Damage event is not PointDamageEvent, using actor location"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Damage event is not PointDamageEvent, using actor location"), *GetClass()->GetName());
 
 	UpdateAndGetHitDirection(hitLocation);
 
 	// Perform hit reaction and apply damage with time dilation effect
 	if (bool bCanDamage = PerformHitReaction(hitLocation, damage))
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit reaction performed, applying time dilation"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit reaction performed, applying time dilation"), *GetClass()->GetName());
 		
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 		
@@ -282,14 +282,14 @@ float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, 
 				else UE_LOG(GPLogCharacterBase, Warning, TEXT("Character destroyed before damage could be applied"));
 			}, delayTime, false);
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Hit reaction failed"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Hit reaction failed"), *GetClass()->GetName());
 	
 	return actualDamage;
 }
 
 void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation)
 {
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Applying damage: %.2f (CanDamage: %s)"), *GetName(), damage, 
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Applying damage: %.2f (CanDamage: %s)"), *GetClass()->GetName(), damage, 
 		   bCanDamage ? TEXT("true") : TEXT("false"));
 
 	// Reset time dilation
@@ -302,20 +302,20 @@ void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* ins
 		playerController->PlayerCameraManager->StartCameraShake(UAttackCameraShake::StaticClass(), 0.5f, 
 																ECameraShakePlaySpace::CameraLocal,
 																FRotator::ZeroRotator);
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Camera shake applied"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Camera shake applied"), *GetClass()->GetName());
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [ApplyDamage] Could not apply camera shake - PlayerController or CameraManager is null"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [ApplyDamage] Could not apply camera shake - PlayerController or CameraManager is null"), *GetClass()->GetName());
 	
 	if (!bCanDamage)
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Damage application blocked"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Damage application blocked"), *GetClass()->GetName());
 		return;
 	}
 
 	// Validate instigator controller
 	if (!instigatorController)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ApplyDamage] instigatorController is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ApplyDamage] instigatorController is null"), *GetClass()->GetName());
 		return;
 	}
 
@@ -323,53 +323,49 @@ void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* ins
 	if (APawn* instigatorPawn = instigatorController->GetPawn())
 	{
 		UAISense_Damage::ReportDamageEvent(GetWorld(), this, instigatorPawn, damage, hitLocation, hitLocation, TEXT("None"));
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Damage reported to AI system"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Damage reported to AI system"), *GetClass()->GetName());
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [ApplyDamage] Could not report damage - instigator pawn is null"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [ApplyDamage] Could not report damage - instigator pawn is null"), *GetClass()->GetName());
 	
 	// Apply health change
 	if (!statsComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ApplyDamage] statsComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ApplyDamage] statsComp is null"), *GetClass()->GetName());
 		return;
 	}
 
 	if (!statsComp->ApplyHealthChange(damage * -1.0f))
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Health depleted, setting character to dead state"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Health depleted, setting character to dead state"), *GetClass()->GetName());
 		
 		if (stateManagerComp)
 		{
 			stateManagerComp->SetCurrentState(GameplayTags::State::Dead());
 		}
-		else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ApplyDamage] Cannot set dead state - stateManagerComp is null"), *GetName());
+		else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ApplyDamage] Cannot set dead state - stateManagerComp is null"), *GetClass()->GetName());
 	}
 }
 
 void ACharacterBase::OnHealthChanged(AActor* InstigatorActor, UStatsComponent* OwningComp, float NewHealth, float Delta)
 {
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Health changed: %.2f (Delta: %.2f)"), *GetName(), NewHealth, Delta);
-
-	// Disable input when character dies
-	if (NewHealth <= 0.0f && Delta <= 0.0f)
-	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Character died, disabling input"), *GetName());
-
-		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-		{
-			DisableInput(PlayerController);
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Input disabled for player controller"), *GetName());
-		}
-		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [OnHealthChanged] Could not disable input - not a player controller"), *GetName());
-	}
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Health changed: %.2f (Delta: %.2f)"), *GetClass()->GetName(), NewHealth, Delta);
 }
 
 void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
 {
 	if (characterState.MatchesTagExact(GameplayTags::State::Dead()))
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Handling death state"), *GetName());
-		
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Handling death state"), *GetClass()->GetName());
+
+		// Disable Input
+		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+		{
+			DisableInput(PlayerController);
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Input disabled for player controller"), *GetClass()->GetName());
+		}
+		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [OnHealthChanged] Could not disable input - not a player controller"), *GetClass()->GetName());
+
+		// Perform Death
 		FPerformDeath performDeath = PerformDeath();
 		
 		if (performDeath.duration > 0.0f)
@@ -406,9 +402,9 @@ void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
 			}
 			GetWorld()->GetTimerManager().SetTimer(timerHandleDestroyDeadActors, timerDelegateDestroyDeadActors, delayTime, false);
 			
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Death cleanup scheduled for %.2f seconds"), *GetName(), delayTime);
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Death cleanup scheduled for %.2f seconds"), *GetClass()->GetName(), delayTime);
 		}
-		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [OnCharacterStateBegin] Death duration is 0, immediate cleanup may be needed"), *GetName());
+		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [OnCharacterStateBegin] Death duration is 0, immediate cleanup may be needed"), *GetClass()->GetName());
 	}
 }
 
@@ -443,7 +439,7 @@ void ACharacterBase::ContinueAttack()
 {
 	if (!combatComp || !stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ContinueAttack] combatComp or stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ContinueAttack] combatComp or stateManagerComp is null"), *GetClass()->GetName());
 		return;
 	}
 
@@ -453,19 +449,19 @@ void ACharacterBase::ContinueAttack()
 		
 		if (stateManagerComp->GetCurrentState() == GameplayTags::State::Attacking())
 		{
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] In attacking state, resetting and continuing"), *GetName());
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] In attacking state, resetting and continuing"), *GetClass()->GetName());
 			stateManagerComp->ResetState();
 			Attack();
 		}
 		else
 		{
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Not in attacking state, starting new attack"), *GetName());
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Not in attacking state, starting new attack"), *GetClass()->GetName());
 			Attack();
 		}
 	}
 	else
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No saved attack, enabling continue flag"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No saved attack, enabling continue flag"), *GetClass()->GetName());
 		combatComp->bCanContinueAttack = true;
 	}
 }
@@ -474,7 +470,7 @@ void ACharacterBase::ResetCombat()
 {
 	if (!combatComp || !stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ResetCombat] combatComp or stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [ResetCombat] combatComp or stateManagerComp is null"), *GetClass()->GetName());
 		return;
 	}
 	
@@ -487,7 +483,7 @@ bool ACharacterBase::CanReciveDamage()
 {
 if (!stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanReciveDamage] stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanReciveDamage] stateManagerComp is null"), *GetClass()->GetName());
 		return false;
 	}
 
@@ -496,14 +492,14 @@ if (!stateManagerComp)
 	statesToCheck.AddTag(GameplayTags::State::Dodging());
 	
 	bool bCanReceiveDamage = !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck);
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [CanReciveDamage] Result: %s"), *GetName(), bCanReceiveDamage ? TEXT("true") : TEXT("false"));
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [CanReciveDamage] Result: %s"), *GetClass()->GetName(), bCanReceiveDamage ? TEXT("true") : TEXT("false"));
 	
 	return bCanReceiveDamage;
 }
 
 FPerformDeath ACharacterBase::PerformDeath()
 {
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing death sequence"), *GetName());
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing death sequence"), *GetClass()->GetName());
 
 	FPerformDeath returnPerformDeath
 	{
@@ -514,20 +510,20 @@ FPerformDeath ACharacterBase::PerformDeath()
 	// Validate essential components
 	if (!combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] combatComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] combatComp is null"), *GetClass()->GetName());
 		return returnPerformDeath;
 	}
 
 	ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
 	if (!mainWeapon)
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] No main weapon found"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] No main weapon found"), *GetClass()->GetName());
 		return returnPerformDeath;
 	}
 
 	if (!stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] stateManagerComp is null"), *GetClass()->GetName());
 		return returnPerformDeath;
 	}
 
@@ -545,22 +541,22 @@ FPerformDeath ACharacterBase::PerformDeath()
 			if (currentEquipment)
 			{
 				returnPerformDeath.actorsToDestory.Add(currentEquipment);
-				UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Added equipment to destruction list: %s"), *GetName(), *currentEquipment->GetName());
+				UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Added equipment to destruction list: %s"), *GetClass()->GetName(), *currentEquipment->GetName());
 			}
 		}
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] equipComp is null, cannot collect equipment"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] equipComp is null, cannot collect equipment"), *GetClass()->GetName());
 	
 	// Handle weapon physics and destruction
 	mainWeapon->SimulateWeaponPhysics();
 	returnPerformDeath.actorsToDestory.Add(mainWeapon);
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Main weapon physics enabled and added to destruction list"), *GetName());
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Main weapon physics enabled and added to destruction list"), *GetClass()->GetName());
 
 	// Play death animation
 	TArray<UAnimMontage*> actionMontageArray = mainWeapon->GetActionMontages(GameplayTags::Action::Die());
 	if (actionMontageArray.IsEmpty())
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] No death montages found"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] No death montages found"), *GetClass()->GetName());
 	}
 	else
 	{
@@ -576,16 +572,16 @@ FPerformDeath ACharacterBase::PerformDeath()
 			{
 				float animDuration = MeshComp->GetAnimInstance()->Montage_Play(selectedMontage);
 				returnPerformDeath.duration = animDuration;
-				UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Death montage playing: %s (Duration: %.2f)"), *GetName(), *selectedMontage->GetName(), animDuration);
+				UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Death montage playing: %s (Duration: %.2f)"), *GetClass()->GetName(), *selectedMontage->GetName(), animDuration);
 			}
 			else
 			{
-				UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] Cannot play death montage - mesh or anim instance is null"), *GetName());
+				UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] Cannot play death montage - mesh or anim instance is null"), *GetClass()->GetName());
 			}
 		}
 		else
 		{
-			UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] Selected death montage is null"), *GetName());
+			UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] Selected death montage is null"), *GetClass()->GetName());
 		}
 	}
 
@@ -595,35 +591,35 @@ FPerformDeath ACharacterBase::PerformDeath()
 		if (aiController->BrainComponent)
 		{
 			aiController->BrainComponent->StopLogic("Dead");
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] AI logic stopped"), *GetName());
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] AI logic stopped"), *GetClass()->GetName());
 		}
-		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] AI controller has no brain component"), *GetName());
+		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] AI controller has no brain component"), *GetClass()->GetName());
 	}
-	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [PerformDeath] Controller is not an AI controller"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [PerformDeath] Controller is not an AI controller"), *GetClass()->GetName());
 
 	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Death sequence completed (Actors to destroy: %d)"), 
-		   *GetName(), returnPerformDeath.actorsToDestory.Num());
+		   *GetClass()->GetName(), returnPerformDeath.actorsToDestory.Num());
 
 	return returnPerformDeath;
 }
 
 bool ACharacterBase::PerformHitReaction(FVector hitLocation, float damage)
 {
-UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing hit reaction (Damage: %.2f, Location: %s)"), *GetName(), damage, *hitLocation.ToString());
+UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing hit reaction (Damage: %.2f, Location: %s)"), *GetClass()->GetName(), damage, *hitLocation.ToString());
 
 	if (!stateManagerComp || !combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformHitReaction] stateManagerComp or combatComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformHitReaction] stateManagerComp or combatComp is null"), *GetClass()->GetName());
 		return false;
 	}
 
 	// Set disabled state during hit reaction
-	stateManagerComp->SetCurrentAction(GameplayTags::State::Disabled());
+	stateManagerComp->SetCurrentState(GameplayTags::State::Disabled());
 
 	ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
 	if (!mainWeapon)
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformHitReaction] No main weapon found"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformHitReaction] No main weapon found"), *GetClass()->GetName());
 		return false;
 	}
 
@@ -650,7 +646,7 @@ UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing hit reaction (Damage: %.2f
 		directionString = TEXT("Right");
 		break;
 	default:
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformHitReaction] Invalid hit direction: %d"), *GetName(), (int32)hitDirection);
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformHitReaction] Invalid hit direction: %d"), *GetClass()->GetName(), (int32)hitDirection);
 		break;
 	}
 
@@ -663,13 +659,13 @@ UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing hit reaction (Damage: %.2f
 				EMontagePlayReturnType::Duration, 0.0f, true);
 			
 			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Hit reaction montage playing: %s direction (Duration: %.2f)"), 
-				   *GetName(), *directionString, playedDuration);
+				   *GetClass()->GetName(), *directionString, playedDuration);
 			return true;
 		}
-		else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformHitReaction] Cannot play hit montage - mesh or anim instance is null"), *GetName());
+		else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformHitReaction] Cannot play hit montage - mesh or anim instance is null"), *GetClass()->GetName());
 
 	}
-	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformHitReaction] No hit montage found for %s direction"), *GetName(), *directionString);
+	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformHitReaction] No hit montage found for %s direction"), *GetClass()->GetName(), *directionString);
 	
 	return false;
 }
@@ -678,7 +674,7 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	int32 montageIndex, bool bRandomIndex)
 {
 	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing action: %s (State: %s, Index: %d, Random: %s)"), 
-		   *GetName(), *characterAction.ToString(), *characterState.ToString(), montageIndex, bRandomIndex ? TEXT("true") : TEXT("false"));
+		   *GetClass()->GetName(), *characterAction.ToString(), *characterState.ToString(), montageIndex, bRandomIndex ? TEXT("true") : TEXT("false"));
 
 	FPerformAction returnPerformAction
 	{
@@ -689,20 +685,20 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	// Validate essential components
 	if (!combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] combatComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] combatComp is null"), *GetClass()->GetName());
 		return returnPerformAction;
 	}
 
 	ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
 	if (!mainWeapon)
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAction] No main weapon found"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAction] No main weapon found"), *GetClass()->GetName());
 		return returnPerformAction;
 	}
 
 	if (!stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] stateManagerComp is null"), *GetClass()->GetName());
 		return returnPerformAction;
 	}
 
@@ -710,7 +706,7 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	TArray<UAnimMontage*> actionMontageArray = mainWeapon->GetActionMontages(characterAction);
 	if (actionMontageArray.Num() == 0)
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAction] No montages found for action: %s"), *GetName(), *characterAction.ToString());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAction] No montages found for action: %s"), *GetClass()->GetName(), *characterAction.ToString());
 		return returnPerformAction;
 	}
 
@@ -721,14 +717,14 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 	if (!actionMontageArray.IsValidIndex(selectedIndex))
 	{
 		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] Invalid montage index: %d (Array size: %d)"), 
-			   *GetName(), selectedIndex, actionMontageArray.Num());
+			   *GetClass()->GetName(), selectedIndex, actionMontageArray.Num());
 		return returnPerformAction;
 	}
 
 	UAnimMontage* actionMontage = actionMontageArray[selectedIndex];
 	if (!actionMontage)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] Selected montage is null at index: %d"), *GetName(), selectedIndex);
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] Selected montage is null at index: %d"), *GetClass()->GetName(), selectedIndex);
 		return returnPerformAction;
 	}
 
@@ -746,9 +742,9 @@ FPerformAction ACharacterBase::PerformAction(FGameplayTag characterState, FGamep
 		returnPerformAction.bSuccess = true;
 		
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Action performed successfully: %s (Duration: %.2f)"), 
-			   *GetName(), *actionMontage->GetName(), actionDuration);
+			   *GetClass()->GetName(), *actionMontage->GetName(), actionDuration);
 	}
-	else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] Cannot play action montage - mesh or anim instance is null"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAction] Cannot play action montage - mesh or anim instance is null"), *GetClass()->GetName());
 
 	return returnPerformAction;
 }
@@ -757,7 +753,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 												bool bIsCalledByAI, float playRate)
 {
 	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Performing attack: %s (Index: %d, Random: %s, AI: %s, Rate: %.2f)"), 
-		   *GetName(), *attackType.ToString(), attackIndex, bRandomIndex ? TEXT("true") : TEXT("false"), 
+		   *GetClass()->GetName(), *attackType.ToString(), attackIndex, bRandomIndex ? TEXT("true") : TEXT("false"), 
 		   bIsCalledByAI ? TEXT("true") : TEXT("false"), playRate);
 
 	FPerformAttack returnPerformAttack
@@ -769,20 +765,20 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	// Validate essential components
 	if (!combatComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] combatComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] combatComp is null"), *GetClass()->GetName());
 		return returnPerformAttack;
 	}
 
 	ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
 	if (!mainWeapon)
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAttack] No main weapon found"), *GetName());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAttack] No main weapon found"), *GetClass()->GetName());
 		return returnPerformAttack;
 	}
 
 	if (!stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] stateManagerComp is null"), *GetClass()->GetName());
 		return returnPerformAttack;
 	}
 
@@ -790,7 +786,7 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	TArray<UAnimMontage*> attackMontageArray = mainWeapon->GetActionMontages(attackType);
 	if (attackMontageArray.Num() == 0)
 	{
-		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAttack] No attack montages found for type: %s"), *GetName(), *attackType.ToString());
+		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformAttack] No attack montages found for type: %s"), *GetClass()->GetName(), *attackType.ToString());
 		return returnPerformAttack;
 	}
 
@@ -801,14 +797,14 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	if (!attackMontageArray.IsValidIndex(selectedIndex))
 	{
 		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] Invalid attack index: %d (Array size: %d)"), 
-			   *GetName(), selectedIndex, attackMontageArray.Num());
+			   *GetClass()->GetName(), selectedIndex, attackMontageArray.Num());
 		return returnPerformAttack;
 	}
 
 	UAnimMontage* attackMontage = attackMontageArray[selectedIndex];
 	if (!attackMontage)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] Selected attack montage is null at index: %d"), *GetName(), selectedIndex);
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] Selected attack montage is null at index: %d"), *GetClass()->GetName(), selectedIndex);
 		return returnPerformAttack;
 	}
 
@@ -845,11 +841,11 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 			targetLocation = hitActor->GetActorLocation() + (forwardVectorToTarget * 200.0f);
 			targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
 		
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetName(), *hitActor->GetName());
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetClass()->GetName(), *hitActor->GetName());
 		}
-		else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target id Dead, using current transform"), *GetName());
+		else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target id Dead, using current transform"), *GetClass()->GetName());
 	}
-	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetName());
+	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetClass()->GetName());
 
 	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
 
@@ -867,11 +863,11 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		returnPerformAttack.bSuccess = true;
 		
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack montage playing: %s (Duration: %.2f)"), 
-			   *GetName(), *attackMontage->GetName(), attackDuration);
+			   *GetClass()->GetName(), *attackMontage->GetName(), attackDuration);
 	}
 	else
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] Cannot play attack montage - mesh or anim instance is null"), *GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformAttack] Cannot play attack montage - mesh or anim instance is null"), *GetClass()->GetName());
 		return returnPerformAttack;
 	}
 
@@ -883,9 +879,9 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	if (currentAttackIndex > lastMontageIndex)
 	{
 		combatComp->attackCount = 0;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack count reset to 0 after reaching max"), *GetName());
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack count reset to 0 after reaching max"), *GetClass()->GetName());
 	}
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack performed successfully (Count: %d/%d)"), *GetName(), attackIndex, lastMontageIndex);
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack performed successfully (Count: %d/%d)"), *GetClass()->GetName(), attackIndex, lastMontageIndex);
 	return returnPerformAttack;
 }
 #pragma endregion ICombatInterface

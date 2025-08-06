@@ -48,11 +48,11 @@ void APlayerBase::BeginPlay()
 	Super::BeginPlay();
 
 	// Ensure combat and state manager components are initialized
-	if (!combatComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] CombatComponent is missing!"), *GetName());
+	if (!combatComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] CombatComponent is missing!"), *GetClass()->GetName());
 
-	if (!stateManagerComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] StateManagerComponent is missing!"), *GetName());
+	if (!stateManagerComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] StateManagerComponent is missing!"), *GetClass()->GetName());
 	
-	if (!playerWidgetRef || !playerWidgetRef->healthWidget) UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [BeginPlay] PlayerWidget or HealthBarWidget is not assigned!"), *GetName());
+	if (!playerWidgetRef || !playerWidgetRef->healthWidget) UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [BeginPlay] PlayerWidget or HealthBarWidget is not assigned!"), *GetClass()->GetName());
 }
 
 void APlayerBase::Tick(float DeltaTime)
@@ -73,9 +73,9 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 			{
 				Subsystem->AddMappingContext(defaultMappingContext, 0);
-				UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Default input mapping context added."), *GetName());
+				UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Default input mapping context added."), *GetClass()->GetName());
 			}
-			else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetupPlayerInputComponent] Failed to get EnhancedInputLocalPlayerSubsystem."), *GetName());
+			else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetupPlayerInputComponent] Failed to get EnhancedInputLocalPlayerSubsystem."), *GetClass()->GetName());
 		}
 	}
 
@@ -90,9 +90,9 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(toggleTutorial, ETriggerEvent::Started, this, &APlayerBase::ToggleTutorial);
 		EnhancedInputComponent->BindAction(toggleMenu, ETriggerEvent::Started, this, &APlayerBase::ToggleMenu);
 		
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Input actions bound successfully."), *GetName());
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Input actions bound successfully."), *GetClass()->GetName());
 	}
-	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetupPlayerInputComponent] Failed to cast PlayerInputComponent to UEnhancedInputComponent."), *GetName());
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetupPlayerInputComponent] Failed to cast PlayerInputComponent to UEnhancedInputComponent."), *GetClass()->GetName());
 }
 
 void APlayerBase::Move(const FInputActionValue& Value)
@@ -116,7 +116,7 @@ void APlayerBase::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, movementValue.Y);
 		AddMovementInput(RightDirection, movementValue.X);
 	}
-	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [Move] Cannot Move, Controller reference is Null."), *GetName());
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [Move] Cannot Move, Controller reference is Null."), *GetClass()->GetName());
 }
 
 void APlayerBase::Look(const FInputActionValue& Value)
@@ -130,23 +130,23 @@ void APlayerBase::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
-	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [Look] Cannot Look, Controller reference is Null."), *GetName());
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [Look] Cannot Look, Controller reference is Null."), *GetClass()->GetName());
 }
 
 void APlayerBase::LightAttack(const FInputActionValue& value)
 {
-	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] LightAttack triggered."), *GetName());
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] LightAttack triggered."), *GetClass()->GetName());
 
 	if (!combatComp || !stateManagerComp)
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [LightAttack] Cannot perform LightAttack: combatComp or stateManagerComp is null"), *GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [LightAttack] Cannot perform LightAttack: combatComp or stateManagerComp is null"), *GetClass()->GetName());
 		return;
 	}
 
 	if (stateManagerComp->GetCurrentState() != GameplayTags::State::Attacking())
 	{
 		// Start Combo Attack
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Start Combo Attack."), *GetName());
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Start Combo Attack."), *GetClass()->GetName());
 		Attack();
 		return;
 	}
@@ -154,7 +154,7 @@ void APlayerBase::LightAttack(const FInputActionValue& value)
 	if (combatComp->bCanContinueAttack)
 	{
 		// Continue Attack
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack & ResetAttack"), *GetName());
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack & ResetAttack"), *GetClass()->GetName());
 		combatComp->bCanContinueAttack = false;
 		stateManagerComp->ResetState();
 		Attack();
@@ -163,7 +163,7 @@ void APlayerBase::LightAttack(const FInputActionValue& value)
 	{
 		// Attack saved to be continued
 		combatComp->bIsAttackSaved = true;
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Attack saved to be continued."), *GetName());
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Attack saved to be continued."), *GetClass()->GetName());
 	}
 }
 
@@ -171,13 +171,13 @@ void APlayerBase::Dodge(const FInputActionValue& value)
 {
 	if (!CanPerformDodge())
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [CanPerformDodge] Cannot Perform Dodge, CanPerformDodge returns False"), *GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [CanPerformDodge] Cannot Perform Dodge, CanPerformDodge returns False"), *GetClass()->GetName());
 		return;
 	}
 	//MotionWarp & Dodge
 	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(dodgeWarpTargetName, GetActorLocation(), GetDesiredRotation());
 	PerformAction(GameplayTags::State::Dodging(), GameplayTags::Action::Dodge(), 0, false);
-	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Performing Dodge."), *GetName());
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Performing Dodge."), *GetClass()->GetName());
 }
 
 void APlayerBase::ToggleWalk(const FInputActionValue& value)
@@ -185,18 +185,18 @@ void APlayerBase::ToggleWalk(const FInputActionValue& value)
 	if (GetMovementSpeedMode() == EMovementSpeedMode::Walking)
 	{
 		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] EMovementSpeedMode::Jogging."), *GetName());
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] EMovementSpeedMode::Jogging."), *GetClass()->GetName());
 	}
 	else if (GetMovementSpeedMode() == EMovementSpeedMode::Jogging)
 	{
 		SetMovementSpeedMode(EMovementSpeedMode::Walking);
-		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] EMovementSpeedMode::Walking."), *GetName());
+		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] EMovementSpeedMode::Walking."), *GetClass()->GetName());
 	}
 }
 
 void APlayerBase::ToggleTutorial(const FInputActionValue& value)
 {
-	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] ToggleTutorial."), *GetName());
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] ToggleTutorial."), *GetClass()->GetName());
 	playerWidgetRef->ToggleTutorial();
 }
 
@@ -205,11 +205,11 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 	if (!playerController || !playerWidgetRef)
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetClass()->GetName());
 		return;
 	}
 
-	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Menu %s."), *GetName(), bIsMenuUp ? TEXT("closed") : TEXT("opened"));
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Menu %s."), *GetClass()->GetName(), bIsMenuUp ? TEXT("closed") : TEXT("opened"));
 
 	if (bIsMenuUp == true)
 	{
@@ -227,7 +227,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 			subsystem->RemoveMappingContext(menuMappingContext);
 			subsystem->AddMappingContext(defaultMappingContext, 0);
 		}
-		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetName());
+		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetClass()->GetName());
 	}
 	else
 	{
@@ -248,7 +248,7 @@ void APlayerBase::ToggleMenu(const FInputActionValue& value)
 			subsystem->RemoveMappingContext(defaultMappingContext);
 			subsystem->AddMappingContext(menuMappingContext, 0);
 		}
-		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetName());
+		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetClass()->GetName());
 	}
 }
 
@@ -258,7 +258,7 @@ void APlayerBase::BobbleCamera() const
 {
 	if (!cameraBoom || !cameraBobbler)
 	{
-		UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BobbleCamera] Failed: cameraBoom or cameraBobbler is null."), *GetName());
+		UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BobbleCamera] Failed: cameraBoom or cameraBobbler is null."), *GetClass()->GetName());
 		return;
 	}
 
@@ -280,7 +280,7 @@ void APlayerBase::EnableRagdoll() const
 		cameraBoom->AttachToComponent(GetMesh(),  FAttachmentTransformRules::KeepWorldTransform, pelvisBoneName);
 		cameraBoom->bDoCollisionTest = false;
 	}
-	else UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [EnableRagdoll] Failed: CameraBoom is null."), *GetName());
+	else UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [EnableRagdoll] Failed: CameraBoom is null."), *GetClass()->GetName());
 	
 	GetMesh()->SetCollisionProfileName(TEXT("ragdoll"), true);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
@@ -293,7 +293,7 @@ FPerformDeath APlayerBase::PerformDeath()
 	
 	if (!playerController || !playerWidgetRef)
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetClass()->GetName());
 		return {};
 	}
 	
@@ -312,7 +312,7 @@ void APlayerBase::OnHealthChanged(AActor* instigatorActor, UStatsComponent* owni
 {
 	if (!playerWidgetRef || !playerWidgetRef->healthWidget)
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [OnHealthChanged] Cannot update health UI: Widget or health widget is null."), *GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [OnHealthChanged] Cannot update health UI: Widget or health widget is null."), *GetClass()->GetName());
 		return;
 	}
 	

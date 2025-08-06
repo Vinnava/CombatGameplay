@@ -35,7 +35,6 @@ void UUpdateEnemyBTS::UpdateBehavior()
 	{
 		FString  logP = masterAIPawn ? masterAIPawn->GetName() : TEXT("None");
 		UE_LOG(GPLogUpdateEnemyBTS, Warning, TEXT("[%s] [UpdateBehavior] masterAIPawn: %s"), *GetName(), *logP);
-		//UE_LOG(GPLogUpdateEnemyBTS, Error, TEXT("[%s] [UpdateBehavior] Couldn't able to update behaviour : masterAI or masterAIController is null"), *GetName());
 		return;
 	}
 
@@ -60,9 +59,11 @@ void UUpdateEnemyBTS::UpdateBehavior()
 			bCanSeeTarget = false;
 			SetEnemyBehavior(EAIBehaviour::Patrol);
 			enemyAIRef->SetHealthBarWidgetVisibility(false);
+			//UE_LOG(GPLogUpdateEnemyBTS, Log, TEXT("[%s] Player Wasn't Deducted"), *GetName());
 		}
 		else
 		{
+			//UE_LOG(GPLogUpdateEnemyBTS, Log, TEXT("[%s] Player Deducted"), *GetName());
 			enemyAIRef->SetHealthBarWidgetVisibility(true);
 			bCanSeeTarget = true;
 

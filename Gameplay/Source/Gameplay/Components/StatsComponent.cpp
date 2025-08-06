@@ -10,31 +10,25 @@ UStatsComponent::UStatsComponent()
 	health = healthMax;
 }
 
-
 bool UStatsComponent::IsAlive() const
 {
 	return health > 0.0f;
 }
-
 
 float UStatsComponent::GetHealthMax() const
 {
 	return healthMax;
 }
 
-
 bool UStatsComponent::ApplyHealthChange(float Delta)
 {
-	float Oldhealth = health;
+	const float OldHealth = health;
 	
 	health = FMath::Clamp(health + Delta, 0.0f, healthMax);
-	
-	//UEngine::AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(FString("health: %f"), health));
 
-	float ActualDelta = health - Oldhealth;
+	float ActualDelta = health - OldHealth;
 	OnHealthChanged.Broadcast(nullptr, this, health, ActualDelta);
 	
 	return ActualDelta != 0;
-	
 }
 

@@ -15,11 +15,11 @@ class GAMEPLAY_API AEnemyBase : public ACharacterBase
 	GENERATED_BODY()
 
 private://Variables
-
+	TObjectPtr<class UHealthBarWidget> cachedHealthBarWidget = nullptr;
 	
 protected://Variables
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UWidgetComponent> healthWidget;
-	/*TObjectPtr<class UAIPerceptionStimuliSourceComponent> stimuliSource;*/
 
 public://Variables
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Initialize|Dummy")
