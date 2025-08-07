@@ -57,7 +57,7 @@ public://Variables
 	TObjectPtr<class UCombatComponent> combatComp;
 	
 private://Functions
-	void ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation);
+	void ApplyDamage(bool bCanDamage, float damage, const AController* instigatorController, const FVector& hitLocation);
 
 #pragma region ComponentDelegates
 
@@ -77,7 +77,7 @@ protected://Functions
 
 	bool CanPerformAttack() const;
 	bool CanPerformDodge() const;
-	EHitDirection UpdateAndGetHitDirection(FVector hitLocation);
+	EHitDirection UpdateAndGetHitDirection(const FVector& hitLocation);
 	FRotator GetDesiredRotation() const;
 	
 public://Functions

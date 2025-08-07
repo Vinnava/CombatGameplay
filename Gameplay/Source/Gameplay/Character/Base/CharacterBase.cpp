@@ -189,7 +189,7 @@ EMovementSpeedMode ACharacterBase::GetMovementSpeedMode() const
 	return movementSpeedMode;
 }
 
-EHitDirection ACharacterBase::UpdateAndGetHitDirection(FVector hitLocation) 
+EHitDirection ACharacterBase::UpdateAndGetHitDirection(const FVector& hitLocation) 
 {
 	// Get direction vectors
 	FVector actorForward = GetActorForwardVector();
@@ -287,7 +287,7 @@ float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, 
 	return actualDamage;
 }
 
-void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* instigatorController, FVector hitLocation)
+void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, const AController* instigatorController, const FVector& hitLocation)
 {
 	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Applying damage: %.2f (CanDamage: %s)"), *GetClass()->GetName(), damage, 
 		   bCanDamage ? TEXT("true") : TEXT("false"));
@@ -319,7 +319,7 @@ void ACharacterBase::ApplyDamage(bool bCanDamage, float damage, AController* ins
 		return;
 	}
 
-	// Report damage to AI system
+	// Report damage to the AI system
 	if (APawn* instigatorPawn = instigatorController->GetPawn())
 	{
 		UAISense_Damage::ReportDamageEvent(GetWorld(), this, instigatorPawn, damage, hitLocation, hitLocation, TEXT("None"));
@@ -356,15 +356,7 @@ void ACharacterBase::OnCharacterStateBegin(FGameplayTag characterState)
 	if (characterState.MatchesTagExact(GameplayTags::State::Dead()))
 	{
 		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Handling death state"), *GetClass()->GetName());
-
-		// Disable Input
-		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-		{
-			DisableInput(PlayerController);
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Input disabled for player controller"), *GetClass()->GetName());
-		}
-		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [OnHealthChanged] Could not disable input - not a player controller"), *GetClass()->GetName());
-
+		
 		// Perform Death
 		FPerformDeath performDeath = PerformDeath();
 		
@@ -492,7 +484,7 @@ if (!stateManagerComp)
 	statesToCheck.AddTag(GameplayTags::State::Dodging());
 	
 	bool bCanReceiveDamage = !stateManagerComp->IsCurrentStateEqualToAny(statesToCheck);
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [CanReciveDamage] Result: %s"), *GetClass()->GetName(), bCanReceiveDamage ? TEXT("true") : TEXT("false"));
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [CanReceiveDamage] Result: %s"), *GetClass()->GetName(), bCanReceiveDamage ? TEXT("true") : TEXT("false"));
 	
 	return bCanReceiveDamage;
 }
@@ -532,6 +524,26 @@ FPerformDeath ACharacterBase::PerformDeath()
 	// Set death action
 	stateManagerComp->SetCurrentAction(GameplayTags::Action::Die());
 
+	// Disable Input
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		DisableInput(PlayerController);
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Input disabled for player controller"), *GetClass()->GetName());
+	}
+	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [PerformDeath] Could not disable input - not a player controller"), *GetClass()->GetName());
+
+	// Handle AI controller cleanup
+	if (AAIController* aiController = Cast<AAIController>(GetController()))
+	{
+		if (aiController->BrainComponent)
+		{
+			aiController->BrainComponent->StopLogic("Dead");
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] AI logic stopped"), *GetClass()->GetName());
+		}
+		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] AI controller has no brain component"), *GetClass()->GetName());
+	}
+	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [PerformDeath] Controller is not an AI controller"), *GetClass()->GetName());
+
 	// Collect equipment for destruction
 	if (equipComp)
 	{
@@ -557,15 +569,13 @@ FPerformDeath ACharacterBase::PerformDeath()
 	if (actionMontageArray.IsEmpty())
 	{
 		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] No death montages found"), *GetClass()->GetName());
+		EnableRagdoll();
 	}
 	else
 	{
-		EnableRagdoll();
-		
 		int32 randomIndex = FMath::RandRange(0, actionMontageArray.Num() - 1);
-		UAnimMontage* selectedMontage = actionMontageArray[randomIndex];
 		
-		if (selectedMontage)
+		if (UAnimMontage* selectedMontage = actionMontageArray[randomIndex])
 		{
 			USkeletalMeshComponent* MeshComp = GetMesh();
 			if (MeshComp && MeshComp->GetAnimInstance())
@@ -584,19 +594,6 @@ FPerformDeath ACharacterBase::PerformDeath()
 			UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [PerformDeath] Selected death montage is null"), *GetClass()->GetName());
 		}
 	}
-
-	// Handle AI controller cleanup
-	if (AAIController* aiController = Cast<AAIController>(GetController()))
-	{
-		if (aiController->BrainComponent)
-		{
-			aiController->BrainComponent->StopLogic("Dead");
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] AI logic stopped"), *GetClass()->GetName());
-		}
-		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] AI controller has no brain component"), *GetClass()->GetName());
-	}
-	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [PerformDeath] Controller is not an AI controller"), *GetClass()->GetName());
-
 	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Death sequence completed (Actors to destroy: %d)"), 
 		   *GetClass()->GetName(), returnPerformDeath.actorsToDestory.Num());
 
