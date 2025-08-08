@@ -59,13 +59,13 @@ public://Functions
 	ABaseWeapon();
 
 	virtual void OnEquipped() override;
-	void OnHit(FHitResult hitResult);
-	void SimulateWeaponPhysics();
+	void OnHit(const FHitResult& hitResult);
+	void SimulateWeaponPhysics() const;
 	
-	void ActivateCollision();
-	void DeactivateCollision();
+	void ActivateCollision() const;
+	void DeactivateCollision() const;
 	
-	void ToggleCombat();
+	void ToggleCombat() const;
 	
 	float GetDamage() const { return damage; }
 	const TArray<UAnimMontage*>& GetActionMontages(FGameplayTag characterAction) const;

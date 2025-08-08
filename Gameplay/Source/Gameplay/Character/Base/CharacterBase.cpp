@@ -31,7 +31,7 @@ ACharacterBase::ACharacterBase()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -95.0f));
 		
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -243,7 +243,7 @@ float ACharacterBase::TakeDamage(float damage, FDamageEvent const& damageEvent, 
 
 	float actualDamage = Super::TakeDamage(damage, damageEvent, eventInstigator, damageCauser);
 
-	if (!CanReciveDamage())
+	if (!CanReceiveDamage())
 	{
 		UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [TakeDamage] Cannot receive damage in current state"), *GetClass()->GetName());
 		return 0.0f;
@@ -471,11 +471,11 @@ void ACharacterBase::ResetCombat()
 	stateManagerComp->ResetAction();
 }
 
-bool ACharacterBase::CanReciveDamage()
+bool ACharacterBase::CanReceiveDamage()
 {
 if (!stateManagerComp)
 	{
-		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanReciveDamage] stateManagerComp is null"), *GetClass()->GetName());
+		UE_LOG(GPLogCharacterBase, Error, TEXT("[%s] [CanReceiveDamage] stateManagerComp is null"), *GetClass()->GetName());
 		return false;
 	}
 
@@ -543,7 +543,12 @@ FPerformDeath ACharacterBase::PerformDeath()
 		else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] AI controller has no brain component"), *GetClass()->GetName());
 	}
 	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] [PerformDeath] Controller is not an AI controller"), *GetClass()->GetName());
-
+		
+	// Handle weapon physics and destruction
+	mainWeapon->SimulateWeaponPhysics();
+	returnPerformDeath.actorsToDestory.Add(mainWeapon);
+	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Main weapon physics enabled and added to destruction list"), *GetClass()->GetName());
+	
 	// Collect equipment for destruction
 	if (equipComp)
 	{
@@ -555,14 +560,10 @@ FPerformDeath ACharacterBase::PerformDeath()
 				returnPerformDeath.actorsToDestory.Add(currentEquipment);
 				UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Added equipment to destruction list: %s"), *GetClass()->GetName(), *currentEquipment->GetName());
 			}
+			else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] currentEquipment is null, cannot destroy equipment"), *GetClass()->GetName());
 		}
 	}
 	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PerformDeath] equipComp is null, cannot collect equipment"), *GetClass()->GetName());
-	
-	// Handle weapon physics and destruction
-	mainWeapon->SimulateWeaponPhysics();
-	returnPerformDeath.actorsToDestory.Add(mainWeapon);
-	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Main weapon physics enabled and added to destruction list"), *GetClass()->GetName());
 
 	// Play death animation
 	TArray<UAnimMontage*> actionMontageArray = mainWeapon->GetActionMontages(GameplayTags::Action::Die());
@@ -815,9 +816,9 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	
 	bool bHitTarget = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(),
-																		GetActorLocation(),400.0f, objectTypes,
-																		false,{this},
-																		EDrawDebugTrace::ForDuration,hitResult, true);
+																		GetActorLocation(), 400.0f, objectTypes,
+																		false, {this},
+																		EDrawDebugTrace::None, hitResult, true);
 
 	// Calculate positioning transform
 	FVector targetLocation = GetActorLocation(); // Default to current location

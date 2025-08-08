@@ -9,7 +9,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "CollisionComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHit, FHitResult);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHit, const FHitResult&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAMEPLAY_API UCollisionComponent : public UActorComponent

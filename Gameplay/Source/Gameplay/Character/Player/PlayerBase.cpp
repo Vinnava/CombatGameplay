@@ -157,6 +157,7 @@ void APlayerBase::LightAttack(const FInputActionValue& value)
 		UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Continuing Attack & ResetAttack"), *GetClass()->GetName());
 		combatComp->bCanContinueAttack = false;
 		stateManagerComp->ResetState();
+		
 		Attack();
 	}
 	else

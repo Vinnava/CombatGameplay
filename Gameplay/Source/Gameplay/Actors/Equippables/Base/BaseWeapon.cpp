@@ -53,7 +53,7 @@ void ABaseWeapon::OnEquipped()
 	else UE_LOG(GPLogBaseWeapon, Warning, TEXT("[%s] [OnEquipped] collisionComp is null"), *GetName());
 }
 
-void ABaseWeapon::OnHit(FHitResult hitResult)
+void ABaseWeapon::OnHit(const FHitResult& hitResult)
 {
 	AActor* hitActor = hitResult.GetActor();
 	if (!hitActor)
@@ -72,18 +72,18 @@ void ABaseWeapon::OnHit(FHitResult hitResult)
 	UE_LOG(GPLogBaseWeapon, Log, TEXT("[%s] Hit Actor: [%s] with %.1f damage"), *GetName(), *hitActor->GetName(), GetDamage());
 }
 
-void ABaseWeapon::SimulateWeaponPhysics()
+void ABaseWeapon::SimulateWeaponPhysics() const
 {
 	if (itemMesh)
 	{
-		itemMesh->SetCollisionProfileName("PhysicalActor", true);
+		itemMesh->SetCollisionProfileName("PhysicsActor", true);
 		itemMesh->SetSimulatePhysics(true);
 		UE_LOG(GPLogBaseWeapon, Log, TEXT("[%s] Simulating Weapon Physics"), *GetName());
 	}
 	else UE_LOG(GPLogBaseWeapon, Warning, TEXT("[%s] [SimulateWeaponPhysics] itemMesh is null"), *GetName());
 }
 
-void ABaseWeapon::ActivateCollision()
+void ABaseWeapon::ActivateCollision() const
 {
 	if (collisionComp)
 	{
@@ -93,7 +93,7 @@ void ABaseWeapon::ActivateCollision()
 	else UE_LOG(GPLogBaseWeapon, Warning, TEXT("[%s] [ActivateCollision] Failed to activate collision: collisionComp is null"), *GetName());
 }
 
-void ABaseWeapon::DeactivateCollision()
+void ABaseWeapon::DeactivateCollision() const
 {
 	if (collisionComp)
 	{
@@ -103,7 +103,7 @@ void ABaseWeapon::DeactivateCollision()
 	else UE_LOG(GPLogBaseWeapon, Warning, TEXT("[%s] [DeactivateCollision] Failed to deactivate collision: collisionComp is null "), *GetName());
 }
 
-void ABaseWeapon::ToggleCombat()
+void ABaseWeapon::ToggleCombat() const
 {
 	if (combatComp)
 	{

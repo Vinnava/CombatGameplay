@@ -40,7 +40,7 @@ class GAMEPLAY_API ICombatInterface
 public://Functions
 	virtual void ContinueAttack() = 0;
 	virtual void ResetCombat() = 0;
-	virtual bool CanReciveDamage() = 0;
+	virtual bool CanReceiveDamage() = 0;
 	virtual FPerformDeath PerformDeath() = 0;
 	virtual bool PerformHitReaction(FVector hitLocation, float damage) = 0;
 	virtual FPerformAction PerformAction(FGameplayTag characterState,

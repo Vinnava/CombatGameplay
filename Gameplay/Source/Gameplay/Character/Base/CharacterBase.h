@@ -97,7 +97,7 @@ public://Functions
 
 	virtual void ContinueAttack() override;
 	virtual void ResetCombat() override;
-	virtual bool CanReciveDamage() override;
+	virtual bool CanReceiveDamage() override;
 	virtual FPerformDeath PerformDeath() override;
 	virtual bool PerformHitReaction(FVector hitLocation, float damage) override;
 	virtual FPerformAction PerformAction(FGameplayTag characterState,
