@@ -62,7 +62,7 @@ void ACharacterBase::PostInitializeComponents()
 
 	if (statsComp && stateManagerComp)
 	{
-		statsComp->OnHealthChanged.AddDynamic(this, &ACharacterBase::OnHealthChanged);
+		statsComp->OnHealthChanged.AddUObject(this, &ACharacterBase::OnHealthChanged);
 		stateManagerComp->OnCharacterStateBegin.AddUObject(this, &ACharacterBase::OnCharacterStateBegin);
 	}
 	else UE_LOG(GPLogCharacterBase, Warning, TEXT("[%s] [PostInitializeComponents] statsComp or stateManagerComp is null"), *GetClass()->GetName());
@@ -780,6 +780,47 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 		return returnPerformAttack;
 	}
 
+	// Perform target detection for positioning
+	FHitResult hitResult {NULL};
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	
+	bool bHitTarget = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(),
+																		GetActorLocation(), 400.0f, objectTypes,
+																		false, {this},
+																		EDrawDebugTrace::None, hitResult, true);
+	
+	// Calculate positioning transform
+	FVector targetLocation = GetActorLocation(); // Default to current location
+	FRotator targetRotation = GetActorRotation(); // Default to current rotation
+	
+	if (bHitTarget && hitResult.GetActor())
+	{
+		const AActor* hitActor = hitResult.GetActor();
+		const ACharacterBase* TargetCharacterRef = Cast<ACharacterBase>(hitActor);
+		
+		FGameplayTagContainer tagsToCheck;
+		tagsToCheck.AddTag(GameplayTags::State::Dead());
+		if (TargetCharacterRef->stateManagerComp->IsCurrentStateEqualToAny(tagsToCheck))
+		{
+			// Target Dead
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target id Dead, using current transform"), *GetClass()->GetName());
+		}
+		else
+		{
+			// Set Motion Warping Data
+			const FVector forwardVectorToTarget = UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::FindLookAtRotation(hitActor->GetActorLocation(), GetActorLocation()));
+
+			targetLocation = hitActor->GetActorLocation() + (forwardVectorToTarget * 200.0f);
+			targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
+		
+			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetClass()->GetName(), *hitActor->GetName());
+		}
+	}
+	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetClass()->GetName());
+
+	//attackType = GameplayTags::Action::Finisher();
+
 	// Get attack montages
 	TArray<UAnimMontage*> attackMontageArray = mainWeapon->GetActionMontages(attackType);
 	if (attackMontageArray.Num() == 0)
@@ -809,48 +850,14 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	// Set attack states
 	stateManagerComp->SetCurrentState(GameplayTags::State::Attacking());
 	stateManagerComp->SetCurrentAction(attackType);
-
-	// Perform target detection for positioning
-	FHitResult hitResult {NULL};
-	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	
-	bool bHitTarget = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), GetActorLocation(),
-																		GetActorLocation(), 400.0f, objectTypes,
-																		false, {this},
-																		EDrawDebugTrace::None, hitResult, true);
-
-	// Calculate positioning transform
-	FVector targetLocation = GetActorLocation(); // Default to current location
-	FRotator targetRotation = GetActorRotation(); // Default to current rotation
-
-	if (bHitTarget && hitResult.GetActor())
-	{
-		const AActor* hitActor = hitResult.GetActor();
-		const ACharacterBase* characterRef = Cast<ACharacterBase>(hitActor);
-
-		FGameplayTagContainer tagsToCheck;
-		tagsToCheck.AddTag(GameplayTags::State::Dead());
-		
-		if (!characterRef->stateManagerComp->IsCurrentStateEqualToAny(tagsToCheck))
-		{
-			const FVector forwardVectorToTarget = UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::FindLookAtRotation(hitActor->GetActorLocation(), GetActorLocation()));
-		
-			targetLocation = hitActor->GetActorLocation() + (forwardVectorToTarget * 200.0f);
-			targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), hitActor->GetActorLocation());
-		
-			UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target detected for attack: %s"), *GetClass()->GetName(), *hitActor->GetName());
-		}
-		else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Target id Dead, using current transform"), *GetClass()->GetName());
-	}
-	else UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] No target detected, using current transform"), *GetClass()->GetName());
-
-	motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
-
 	// Play attack animation
 	USkeletalMeshComponent* MeshComp = GetMesh();
 	if (MeshComp && MeshComp->GetAnimInstance())
 	{
+		// Motion Warping
+		motionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(attackWarpTargetName, targetLocation, targetRotation);
+		
 		float attackDuration = MeshComp->GetAnimInstance()->Montage_Play(attackMontage,
 																		playRate,
 																		EMontagePlayReturnType::Duration,
@@ -874,10 +881,12 @@ FPerformAttack ACharacterBase::PerformAttack(FGameplayTag attackType, int32 atta
 	int32 currentAttackIndex = combatComp->attackCount;
 	int32 lastMontageIndex = attackMontageArray.Num() - 1;
 	
-	if (currentAttackIndex > lastMontageIndex)
+	if (currentAttackIndex > lastMontageIndex || stateManagerComp->GetCurrentState() == GameplayTags::Action::Finisher())
 	{
-		combatComp->attackCount = 0;
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack count reset to 0 after reaching max"), *GetClass()->GetName());
+		/*combatComp->attackCount = 0;
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack count reset to 0 after reaching max"), *GetClass()->GetName());*/
+		combatComp->ResetCombat();
+		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Reached max attack count, Reset Combat"), *GetClass()->GetName());
 	}
 	UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Attack performed successfully (Count: %d/%d)"), *GetClass()->GetName(), attackIndex, lastMontageIndex);
 	return returnPerformAttack;

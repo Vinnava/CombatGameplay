@@ -16,6 +16,11 @@ namespace GameplayTags
 			static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Action.Attack.LightAttack"));
 			return Tag;
 		}
+		inline const FGameplayTag& Finisher()
+		{
+			static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Action.Attack.Finisher"));
+			return Tag;
+		}
 		inline const FGameplayTag& Dodge()
 		{
 			static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("Character.Action.Dodge"));

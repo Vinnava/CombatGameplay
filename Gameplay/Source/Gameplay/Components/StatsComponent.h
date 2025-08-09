@@ -7,11 +7,7 @@
 #include "StatsComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged,
-											AActor*, instigatorActor,
-											UStatsComponent*, owningComp,
-											float, newHealth,
-											float, delta);
+DECLARE_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, UStatsComponent*, float, float);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -43,6 +39,5 @@ public:
 	float GetHealthMax() const;
 
 //Variables
-	UPROPERTY(BlueprintAssignable, Category="Attributes")
 	FOnHealthChanged OnHealthChanged;	
 };

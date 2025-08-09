@@ -60,8 +60,7 @@ private://Functions
 	void ApplyDamage(bool bCanDamage, float damage, const AController* instigatorController, const FVector& hitLocation);
 
 #pragma region ComponentDelegates
-
-	UFUNCTION()
+	
 	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta);
 	virtual void OnCharacterStateBegin(FGameplayTag characterState);
 #pragma endregion ComponentDelegates
@@ -76,6 +75,7 @@ protected://Functions
 	virtual void EnableRagdoll() const;
 
 	bool CanPerformAttack() const;
+	bool CanPerformFinisher() const;
 	bool CanPerformDodge() const;
 	EHitDirection UpdateAndGetHitDirection(const FVector& hitLocation);
 	FRotator GetDesiredRotation() const;
