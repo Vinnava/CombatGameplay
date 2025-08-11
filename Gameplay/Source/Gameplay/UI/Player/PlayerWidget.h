@@ -18,10 +18,29 @@ private://Variables
 
 	
 protected://Variables
+# pragma region WidgetAnimations
+	
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> healthAnim;
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> playAnim;
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> restartAnim;
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> toggleTutorialAnim;
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> toggleTabAnim;
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> toggleManualAnim;
+	UPROPERTY(meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> hideAllOverlayAnim;
+# pragma endregion WidgetAnimations
+	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> textCurrentState;
+	
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> textCurrentAction;
+	TObjectPtr<UTextBlock> textCurrentAction;
 
 public://Variables
 	UPROPERTY(meta=(BindWidget))
@@ -34,6 +53,8 @@ protected://Functions
 
 	
 public://Functions
+	void PlayerWidget();
+	
 	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
 	void RestartWidget();
 	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")

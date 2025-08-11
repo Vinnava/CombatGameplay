@@ -18,7 +18,8 @@ private://Variables
 
 	
 protected://Variables
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<class UProgressBar> HealthBar;
 
 public://Variables
 
@@ -30,6 +31,6 @@ protected://Functions
 
 	
 public://Functions
-	UFUNCTION(BlueprintImplementableEvent ,Category = "HealthBarWidget")
-	void UpdateHealth(float health); 
+	//UFUNCTION(BlueprintImplementableEvent ,Category = "HealthBarWidget")
+	void UpdateHealth(float health) const; 
 };
