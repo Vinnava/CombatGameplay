@@ -52,7 +52,7 @@ void APlayerBase::BeginPlay()
 
 	if (!stateManagerComp) UE_LOG(GPLogPlayerBase, Error, TEXT("[%s] [BeginPlay] StateManagerComponent is missing!"), *GetClass()->GetName());
 	
-	if (!playerWidgetRef || !playerWidgetRef->healthWidget) UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [BeginPlay] PlayerWidget or HealthBarWidget is not assigned!"), *GetClass()->GetName());
+	if (!playerWidgetRef || !playerWidgetRef->GetHealthBarWidget()) UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [BeginPlay] PlayerWidget or HealthBarWidget is not assigned!"), *GetClass()->GetName());
 }
 
 void APlayerBase::Tick(float DeltaTime)
@@ -311,11 +311,11 @@ FPerformDeath APlayerBase::PerformDeath()
 
 void APlayerBase::OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta)
 {
-	if (!playerWidgetRef || !playerWidgetRef->healthWidget)
+	if (!playerWidgetRef || !playerWidgetRef->GetHealthBarWidget())
 	{
 		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [OnHealthChanged] Cannot update health UI: Widget or health widget is null."), *GetClass()->GetName());
 		return;
 	}
 	
-	playerWidgetRef->healthWidget->UpdateHealth(newHealth);
+	playerWidgetRef->GetHealthBarWidget()->UpdateHealth(newHealth);
 }
