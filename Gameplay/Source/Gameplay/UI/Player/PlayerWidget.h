@@ -21,6 +21,10 @@ private://Variables
 	FColor unhoveredColor {FColor::FromHex(TEXT("#FFFFFFFF"))};
 
 	bool bIsTutorialVisible {false};
+	bool bIsMenuVisible {false};
+
+	bool bCanToggleTutorial {false};
+	bool bCanToggleMenu {false};
 	
 protected://Variables
 # pragma region WidgetAnimations
@@ -37,8 +41,6 @@ protected://Variables
 	TObjectPtr<UWidgetAnimation> toggleTabAnim;
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> toggleManualAnim;
-	UPROPERTY(Transient, meta = (BindWidgetAnim))
-	TObjectPtr<UWidgetAnimation> hideAllOverlayAnim;
 # pragma endregion WidgetAnimations
 
 	UPROPERTY(meta=(BindWidget))
@@ -70,7 +72,7 @@ protected://Variables
 	float unhoveredFontSize {24.0f};
 
 public://Variables
-	UPROPERTY(BlueprintReadWrite, Category = Delegate)
+	UPROPERTY(BlueprintAssignable, Category = Delegate)
 	FOnClickedPlayGame onClickPlayGame;
 
 private://Functions
@@ -104,13 +106,15 @@ public://Functions
 	void PlayerWidget();
 
 	UHealthBarWidget* GetHealthBarWidget(){ return healthWidget; }
+
+	UFUNCTION(BlueprintCallable, Category = PlayerWidget)
+	void SetHealthAndTutorialVisibility(bool bVisibility);
+
+	UFUNCTION(BlueprintCallable, Category = PlayerWidget)
+	void EnableToggle() { bCanToggleTutorial = true; bCanToggleMenu = true;}
 	
-	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
-	void RestartWidget();
-	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
 	void ToggleTutorial();
-	UFUNCTION(BlueprintImplementableEvent, Category = "PlayerWidget")
-	void RemoveRestartWidget();
+	void ToggleMenu();
 
 	void UpdateCurrentStateText(struct  FGameplayTag newState) const;
 	void UpdateCurrentActionText(FGameplayTag newAction) const;

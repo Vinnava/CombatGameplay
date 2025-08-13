@@ -16,13 +16,6 @@ class GAMEPLAY_API APlayerBase : public ACharacterBase
 
 private://Variables
 #pragma region InputVariables
-	/** MappingContext */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* defaultMappingContext;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* menuMappingContext;
-
 	/** Move Input Action */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|InputActions", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* moveAction;
@@ -48,10 +41,10 @@ private://Variables
 	
 #pragma endregion InputVariables
 
+	const class UInputMappingContext* currentMappingContext;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Initizalize|MotionWarping")
 	FName dodgeWarpTargetName;
-	
-	bool bIsMenuUp;
 	
 protected://Variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -70,6 +63,13 @@ protected://Variables
 	FVector2D movementValue;
 
 public://Variables
+	/** MappingContext */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
+	const UInputMappingContext* defaultMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Initialize|Input|MappingContexts", meta = (AllowPrivateAccess = "true"))
+	const UInputMappingContext* menuMappingContext;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = WidgetRef)
 	TObjectPtr<class UPlayerWidget> playerWidgetRef;
 
@@ -101,6 +101,9 @@ protected://Functions
 	
 public://Functions
 	APlayerBase();
+
+	void ChangeInputMappingContext(const UInputMappingContext* newMappingContext);
+	void SetDefaultInputMappingContext();
 	
 	virtual FPerformDeath PerformDeath() override;
 	virtual void OnHealthChanged(AActor* instigatorActor, UStatsComponent* owningComp, float newHealth, float delta) override;

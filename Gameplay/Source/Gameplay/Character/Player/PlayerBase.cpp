@@ -33,7 +33,7 @@ APlayerBase::APlayerBase()
 	// Create a follow camera
 	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	followCamera->bUsePawnControlRotation = false; // The Camera does not rotate relative to the arm
 
 	// Creating Camera Bobbler
 	cameraBobbler = CreateDefaultSubobject<USceneComponent>(TEXT("CameraBobbler"));
@@ -197,63 +197,61 @@ void APlayerBase::ToggleWalk(const FInputActionValue& value)
 
 void APlayerBase::ToggleTutorial(const FInputActionValue& value)
 {
-	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] ToggleTutorial."), *GetClass()->GetName());
+	if (!playerWidgetRef)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleTutorial] playerWidgetRef returns Null"), *GetClass()->GetName());
+		return;
+	}
 	playerWidgetRef->ToggleTutorial();
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] ToggleTutorial"), *GetClass()->GetName());
 }
 
 void APlayerBase::ToggleMenu(const FInputActionValue& value)
 {
-	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
-	if (!playerController || !playerWidgetRef)
+	if (!playerWidgetRef)
 	{
-		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: PlayerController or PlayerWidgetRef is null."), *GetClass()->GetName());
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleTutorial] playerWidgetRef returns Null"), *GetClass()->GetName());
 		return;
 	}
-
-	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] Menu %s."), *GetClass()->GetName(), bIsMenuUp ? TEXT("closed") : TEXT("opened"));
-
-	if (bIsMenuUp == true)
-	{
-		// Remove Menu
-		bIsMenuUp = false;
-		
-		FInputModeGameOnly inputMode;
-		playerController->SetInputMode(inputMode);
-		
-		playerController->SetShowMouseCursor(false);
-		playerWidgetRef->RemoveRestartWidget();
-		
-		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
-		{
-			subsystem->RemoveMappingContext(menuMappingContext);
-			subsystem->AddMappingContext(defaultMappingContext, 0);
-		}
-		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetClass()->GetName());
-	}
-	else
-	{
-		// Add Menu
-		bIsMenuUp = true;
-		
-		FInputModeGameAndUI inputMode;
-		inputMode.SetWidgetToFocus(playerWidgetRef->TakeWidget());
-		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		inputMode.SetHideCursorDuringCapture(true);
-		playerController->SetInputMode(inputMode);
-
-		playerController->SetShowMouseCursor(true);
-		playerWidgetRef->RestartWidget();
-
-		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
-		{
-			subsystem->RemoveMappingContext(defaultMappingContext);
-			subsystem->AddMappingContext(menuMappingContext, 0);
-		}
-		else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ToggleMenu] Failed: MappingContext."), *GetClass()->GetName());
-	}
+	playerWidgetRef->ToggleMenu();
+	UE_LOG(GPLogPlayerBase, Log, TEXT("[%s] ToggleMenu"), *GetClass()->GetName());
 }
 
 #pragma endregion InputComponents
+
+void APlayerBase::ChangeInputMappingContext(const UInputMappingContext* newMappingContext)
+{
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	if (!playerController)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ChangeInputMappingContext] Failed: PlayerController is null."), *GetClass()->GetName());
+		return;
+	}
+	if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+	{
+		subsystem->RemoveMappingContext(currentMappingContext);
+		subsystem->AddMappingContext(newMappingContext, 0);
+		currentMappingContext = newMappingContext;
+	}
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [ChangeInputMappingContext] Failed: MappingContext."), *GetClass()->GetName());
+}
+
+void APlayerBase::SetDefaultInputMappingContext()
+{
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	if (!playerController)
+	{
+		UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetDefaultInputMappingContext] Failed: PlayerController is null."), *GetClass()->GetName());
+		return;
+	}
+	if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+	{
+		subsystem->RemoveMappingContext(currentMappingContext);
+		subsystem->AddMappingContext(defaultMappingContext, 0);
+		currentMappingContext = defaultMappingContext;
+	}
+	else UE_LOG(GPLogPlayerBase, Warning, TEXT("[%s] [SetDefaultInputMappingContext] Failed: MappingContext."), *GetClass()->GetName());
+}
 
 void APlayerBase::BobbleCamera() const
 {
@@ -304,7 +302,7 @@ FPerformDeath APlayerBase::PerformDeath()
 	playerController->SetInputMode(inputModeData);
 	
 	playerController->SetShowMouseCursor(true);
-	playerWidgetRef->RestartWidget();
+	playerWidgetRef->ToggleMenu();
 	
 	return Super::PerformDeath();
 }

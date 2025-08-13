@@ -145,7 +145,7 @@ void ACharacterBase::SetMovementSpeedMode(const EMovementSpeedMode newMovementSp
 {
 	if (newMovementSpeedMode == movementSpeedMode)
 	{
-		UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed mode unchanged: %s"), *GetClass()->GetName(), *UEnum::GetDisplayValueAsText(movementSpeedMode).ToString());
+		//UE_LOG(GPLogCharacterBase, Log, TEXT("[%s] Movement speed mode unchanged: %s"), *GetClass()->GetName(), *UEnum::GetDisplayValueAsText(movementSpeedMode).ToString());
 		return;
 	}
 
