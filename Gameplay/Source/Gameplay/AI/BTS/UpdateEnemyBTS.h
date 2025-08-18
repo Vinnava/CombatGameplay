@@ -7,6 +7,7 @@
 #include "UpdateEnemyBTS.generated.h"
 
 
+enum class EAIBehaviour : uint8;
 /**
  * 
  */
@@ -35,7 +36,7 @@ protected://Variables
 	float maxAttackRange{0.0f};
 
 private://Functions
-	void SetEnemyBehavior(enum class EAIBehaviour newBehaviour);
+	void SetEnemyBehavior(EAIBehaviour newBehaviour) const;
 	void UpdateBehavior();
 	
 protected://Functions

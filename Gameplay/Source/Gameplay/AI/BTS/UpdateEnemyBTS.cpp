@@ -23,7 +23,7 @@ void UUpdateEnemyBTS::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 	UpdateBehavior();
 }
 
-void UUpdateEnemyBTS::SetEnemyBehavior(EAIBehaviour newBehaviour)
+void UUpdateEnemyBTS::SetEnemyBehavior(EAIBehaviour newBehaviour) const
 {
 	//Updating behaviourKey Value
 	blackboardComp->SetValueAsEnum(behaviourKey.SelectedKeyName, static_cast<uint8>(newBehaviour));

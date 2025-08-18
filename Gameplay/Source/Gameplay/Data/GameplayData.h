@@ -24,14 +24,15 @@ enum class EMovementSpeedMode : uint8
 	Sprinting   UMETA(DisplayName = "Sprinting")
 };
 
-enum class EAIBehaviour
+UENUM(BlueprintType)
+enum class EAIBehaviour : uint8
 {
-	None,
-	Patrol,
-	Chase,
-	Attack,
-	Hit,
-	Dead
+	None      UMETA(DisplayName = "None"),
+	Patrol    UMETA(DisplayName = "Patrol"),
+	Chase     UMETA(DisplayName = "Chase"),
+	Attack    UMETA(DisplayName = "Attack"),
+	Hit       UMETA(DisplayName = "Hit"),
+	Dead      UMETA(DisplayName = "Dead"),
 };
 
 UCLASS()
