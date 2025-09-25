@@ -7,7 +7,7 @@
 #include "StatsComponent.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, UStatsComponent*, float, float);
+DECLARE_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, class UStatsComponent*, float, float);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -19,12 +19,12 @@ public:
 	// Sets default values for this component's properties
 	UStatsComponent();
 
-protected:
+private:
 //Variables
-	UPROPERTY(VisibleAnywhere, Category="Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization|Attributes", meta = (AllowPrivateAccess = "true"))
 	float health;
 
-	UPROPERTY(EditDefaultsOnly, Category="Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Initialization|Attributes", meta = (AllowPrivateAccess = "true"))
 	float healthMax;
 
 public:
